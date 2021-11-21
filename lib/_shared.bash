@@ -2,11 +2,6 @@
 
 set -o nounset
 
-# time-related functions
-ts()      { date "+%Y-%m-%d %T"; }              # local timestamp for output
-ts_file() { date --utc "+%Y-%m-%d-%H-%M-%S"; }  # timestamp for filenames, in UTC for consistency
-ts_unix() { date "+%s.%N"; }                    # unix timestamp with nanoseconds for use with elapsed()
-
 # datatype functions
 array_contains () {
   local e match="$1"
