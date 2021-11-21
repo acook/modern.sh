@@ -1,17 +1,20 @@
 #!/usr/bin/env bash
 
 cd "$(dirname "${BASH_SOURCE[0]}")/../lib"
+source ../modern.sh
 
+say "building new monolithic library..."
 setup() { echo > ,; esc="$(printf '\033')"; }
 teardown() { rm ,; }
 compile() { cat display.bash , script.bash , exit.bash , time.bash , utility.bash , wrappers.bash , compatibility.bash , init.bash; }
-comments() { \grep $1 '^\s*#'; }
+comments() { \grep ${1:-} '^\s*#'; }
 no_comments() { comments -v; }
 
 setup
 
 compile | no_comments > ../modern.sh
 
+say "building documentation..."
 usages() { \grep '^\s*# usage:' -A 4; }
 mutate() {
   sed "s/# usage:/\n$esc""[35musage:$esc""[0m/g" | \
@@ -22,3 +25,4 @@ mutate() {
 compile | usages | comments | mutate > ../doc/help.ansi
 
 teardown
+ok
