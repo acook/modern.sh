@@ -13,5 +13,5 @@ mutate_example() { sed ''; }
 
 setup
 compile | no_comments > ../modern.sh
-compile | usages | comments > ../help.txt
+compile | usages | comments > ../doc/help.txt
 teardown
