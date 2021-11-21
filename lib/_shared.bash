@@ -10,28 +10,6 @@ array_contains () {
   return 1
 }
 
-# EXIT STATUS FUNCTIONS
-ok()   { say "\e[32m(ok) $*\e[0m"; exit 0; }
-die()  { warn "\e[31m(die) $*\e[0m"; exit 1; }
-# usage: die_status <status> [message]
-die_status() { warn "\e[31m(died with status code $1) ${*:2}\e[0m"; exit "$1"; }
-# usage quit_status <status> [message]
-quit_status() {
-  if scriptsame; then
-    if [[ $1 -eq 0 ]]; then
-      ok "${*:2}"
-    else
-      die_status "$@"
-    fi
-  else
-    if [[ $1 -eq 0 ]]; then
-      say "${*:2}"
-    else
-      warn "${*:2}"
-    fi
-    return "$1"
-  fi
-}
 
 # WRAPPER FUNCTIONS
 
