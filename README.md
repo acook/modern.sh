@@ -17,7 +17,7 @@ This provides such capabilities as:
 Usage
 =====
 
-There is a little bit of require boilerplate for your entry script to reliably find `modern.sh`
+There is almost no boilerplate for your entry script to reliably find `modern.sh.`
 
 If you have `modern.sh` in your path, you're good to start using it with just:
 
