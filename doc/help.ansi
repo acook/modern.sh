@@ -1,0 +1,137 @@
+
+[35musage:[0m say <text>
+[34mexample:[0m say 'articulating splines'
+[34m	[0mintended for stdout logging and information about current actions
+
+[35musage:[0m warn <text>
+[34mexample:[0m warn 'that is one doomed space marine'
+[34m	[0msame as `say` except it sends to stderr
+
+[35musage:[0m sayenv <VARNAME>
+[34mexample:[0m sayenv path
+[34m	[0mdump the name and contents of an environment variable in say format
+
+[35musage:[0m colorfg <color>
+[34mexample:[0m colorfg 97; echo "some lavendarish text"
+[34m	[0measily change the foreground (text) to one of 256 colors
+[34m	[0mthe 16 standard colors are also addressable by name
+
+[35musage:[0m colorbg <color>
+[34mexample:[0m colorbg 22; echo "text with a dark green background"
+[34m	[0measily change the foreground (text) to one of 256 colors
+[34m	[0mthe 16 standard colors are also addressable by name
+
+[35musage:[0m colorreset
+[34mexample:[0m echo "$(colorfg red)prompt> $(colorreset)"
+[34m	[0mreturn console to default color settings
+
+[35musage:[0m ansigoto <column>
+[34mexample:[0m echo overwrite this; ansigoto 0; echo blah blah blah
+[34m	[0mmove the cursor to a column on the current line
+
+[35musage:[0m ansieol
+[34mexample:[0m echo '| good for borders'; ansieol; echo '|'
+[34m	[0msends the cursor to the end of the line
+
+[35musage:[0m ansiup <count>
+[34mexample:[0m echo "loading..."; load file; ansiup 1; ansigoto 0; echo 'done!     '
+[34m	[0msends the cursor up the specified number of lines
+
+[35musage:[0m displayname <path>
+[34mexample:[0m displayname "$(pwd)"
+[34m	[0mtakes a path and generates "last_folder/filename" string
+
+[35musage:[0m scriptname
+[34mexample:[0m echo "the current script is $(scriptname)"
+[34m	[0mformats the current script name for display
+
+[35musage:[0m scriptcaller
+[34mexample:[0m scriptcaller
+[34m	[0mdetermine the currently executing script via caller
+[34m	[0m!! can't be nested in other functions !!
+
+[35musage:[0m scriptsame
+[34mexample:[0m if scriptsame; then echo "this is the primary script"; fi
+[34m	[0mfor conditionals, determines if caller is the same as the main parent script
+
+[35musage:[0m include <script>
+[34mexample:[0m include "time.bash"
+[34m	[0msource a script only once
+
+[35musage:[0m load_nonfatal <script>
+[34mexample:[0m load_nonfatal missing_script.sh
+[34m	[0msource a script once or more, warning on errors
+
+[35musage:[0m load <script>
+[34mexample:[0m load vital_script.sh
+[34m	[0msource a script once or more, exiting if it is missing or returns an error
+
+[35musage:[0m bash_trace
+[34mexample:[0m bash_trace
+[34m	[0mfor debugging bash functions
+
+[35musage:[0m _set_scriptcurrent
+[34mexample:[0m _set_scriptcurrent
+[34m	[0mused internally to set the current script global
+[34m	[0mif this gets broken all hell breaks loose
+
+[35musage:[0m ok <message>
+[34mexample:[0m ok 'all good!'
+[34m	[0mformatted success message and exit
+[34m	[0mmessage is optional
+
+[35musage:[0m die <message>
+[34mexample:[0m die 'hit the road jack'
+[34m	[0mformatted failure message and exit
+[34m	[0mmessage is optional
+
+[35musage:[0m die_status <status> [message]
+[34mexample:[0m die_status 255 "file not found"
+[34m	[0mformatted failure message and exit with specified status code
+
+[35musage:[0m quit_status <status> [message]
+[34mexample:[0m quit_status $? "last command exited"
+[34m	[0mautomatically selects the correct exit function based on context
+
+[35musage:[0m ts
+[34mexample:[0m echo "The time is $(ts)
+[34m	[0mlocal timestamp for output
+
+[35musage:[0m ts_file
+[34mexample:[0m curl package.pkg -o "package_$(ts_file).pkg"
+[34m	[0mtimestamp for filenames, in UTC for consistency
+
+[35musage:[0m ts_unix
+[34mexample:[0m start_time="$(ts_unix)"
+[34m	[0munix timestamp with nanoseconds
+[34m	[0mrequired by elapsed()
+
+[35musage:[0m realpath <path>
+[34m	[0mattempts to resolve all symlinks until the origin path is discovered
+[34m	[0mcircular symlinks will keep it looping forever
+
+[35musage:[0m elapsed <start_time> <end_time>
+[34m	[0mtakes two unix timestamps with nanoseconds
+[34m	[0mreturns the difference in human-readable format
+
+[35musage:[0m safe_cd <path>
+[34mexample:[0m safe_cd /mnt/network_drive
+[34m	[0mif cd fails then we should exit
+[34m	[0mfixes a common shellcheck complaint
+
+[35musage:[0m command_exists <command_name>
+[34mexample:[0m if command_exists lsb_release; lsb_release -ds; fi
+[34m	[0mused in conditionals to determine presence of a command or executable
+
+[35musage:[0m run "title" <command> [args]
+[34mexample:[0m run "compile" clang thing.c
+[34m	[0mdisplay command to run, confirm it exists, run it, output a warning on failure
+
+[35musage:[0m run_or_die "title" <command> [args]
+[34mexample:[0m run_or_die "download dependencies" curl -O package.pkg
+[34m	[0mas run, but die if command missing or exits with an error
+
+[35musage:[0m gfix <command> <opts>
+[34mexample:[0m gfix readlink -m .
+[34m	[0mwill try to prefix the command with a g
+[34m	[0mnewer versions of macOS have broken the ability to reliably modify the path in subshells

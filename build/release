@@ -2,16 +2,23 @@
 
 cd "$(dirname "${BASH_SOURCE[0]}")/../lib"
 
-setup() { echo > ,; }
+setup() { echo > ,; esc="$(printf '\033')"; }
 teardown() { rm ,; }
 compile() { cat display.bash , script.bash , exit.bash , time.bash , utility.bash , wrappers.bash , compatibility.bash , init.bash; }
 comments() { \grep $1 '^\s*#'; }
 no_comments() { comments -v; }
-usages() { \grep '^\s*# usage:' -A 4; }
-mutate_usage() { sed ''; }
-mutate_example() { sed ''; }
 
 setup
+
 compile | no_comments > ../modern.sh
-compile | usages | comments > ../doc/help.txt
+
+usages() { \grep '^\s*# usage:' -A 4; }
+mutate() {
+  sed "s/# usage:/\n$esc""[35musage:$esc""[0m/g" | \
+  sed "s/# example:/$esc""[34mexample:$esc""[0m/g" | \
+  sed "s/#\s*/$esc""[34m\t$esc""[0m/g"
+}
+
+compile | usages | comments | mutate > ../doc/help.ansi
+
 teardown
