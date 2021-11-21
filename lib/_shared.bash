@@ -11,36 +11,6 @@ array_contains () {
 }
 
 
-# WRAPPER FUNCTIONS
-
-# if cd fails then we should exit
-safe_cd() {
-  say "entering directory \`$1\`"
-  cd "$1" || die "safe_cd: couldn't change directory to \`$1\`";
-}
-# used for conditionals to determine presence of a command or executable
-command_exists() { command -v "$1" > /dev/null 2>&1; }
-# usage: run "title" <command> [args]
-# display command to run, confirm it exists, run it, output a warning on failure
-run() {
-  say "running $1 command: \`${*:2}\`"
-  if command_exists "$2"; then
-    "${@:2}"
-    ret=$?
-    [[ $ret ]] || warn "$1 command exited with status code $?"
-    return $ret
-  else
-    warn "command \`$2\` not found"
-    return 255
-  fi
-}
-# usage: run_or_die "title" <command> [args]
-# as run, but die if command missing or exits with an error
-run_or_die() {
-  say "running $1 command: \`${*:2}\`"
-  command_exists "$2" || die "command \`$2\` not found"
-  $2 "${@:3}" || die_status $? "$2 command"
-}
 
 # UTILITY FUNCTIONS
 
