@@ -2,6 +2,9 @@
 #
 # This contains functions that are important for basic information output, color, and cursor movement.
 
+# required by `say` for timestamps
+#needs time
+
 # usage: say <text>
 # example: say 'articulating splines'
 # intended for stdout logging and information about current actions
