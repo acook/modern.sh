@@ -80,62 +80,6 @@ trace() { # for debugging bash functions
   echo BASH
 }
 
-# DISPLAY FUNCTIONS
-say()  { echo -ne " -- ($(scriptname) @ $(ts)) : $*\n"; }
-warn() { say "$*" >&2; }
-# usage: sayenv <VARNAME>
-sayenv() { say "$1=$(eval "echo -ne \$$1")"; }
-colorfg() {
-  case "$1" in
-  ("black") color=30 ;;
-  ("red") color=31 ;;
-  ("green") color=32 ;;
-  ("yellow") color=33 ;;
-  ("blue") color=34 ;;
-  ("magenta") color=35 ;;
-  ("cyan") color=36 ;;
-  ("white") color=37 ;;
-
-  ("green3") color="38;5;34" ;;
-  ("red3") color="38;5;160" ;;
-  ("orangered") color="38;5;202" ;;
-  ("violet") color="38;5;128" ;;
-  (*) color="38;5;$1" ;;
-  esac
-  echo -ne "\e[$color""m"
-}
-colorbg() {
-  case "$1" in
-  ("black") color=40 ;;
-  ("red") color=41 ;;
-  ("green") color=42 ;;
-  ("yellow") color=43 ;;
-  ("blue") color=44 ;;
-  ("magenta") color=45 ;;
-  ("cyan") color=46 ;;
-  ("white") color=47 ;;
-
-  ("green3") color="48;5;34" ;;
-  ("red3") color="48;5;160" ;;
-  ("orangered") color="48;5;202" ;;
-  ("violet") color="48;5;128" ;;
-  (*) color="48;5;$1" ;;
-  esac
-  echo -ne "\e[$color""m"
-}
-colorreset() {
-  echo -ne "\e[0m"
-}
-ansigoto() {
-  echo -ne "\e[$1""G"
-}
-ansieol() {
-  echo -ne "\e[K"
-}
-ansiup() {
-  echo -ne "\e[$1""A"
-}
-
 # EXIT STATUS FUNCTIONS
 ok()   { say "\e[32m(ok) $*\e[0m"; exit 0; }
 die()  { warn "\e[31m(die) $*\e[0m"; exit 1; }
