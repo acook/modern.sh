@@ -31,6 +31,12 @@ If you set it up as a library in a relative path and aren't sure where it might 
 source "$(dirname ${BASH_SOURCE[0]})/libpath/modern.bash"
 ```
 
+Pretty much every function is documented in `doc/help.ansi`, just display it in your terminal or an ansi-capable editor to read more:
+
+```shell
+cat doc/help.ansi
+```
+
 Plans
 =====
 
