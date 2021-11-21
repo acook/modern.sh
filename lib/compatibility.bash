@@ -14,6 +14,8 @@ gfix() {
   fi
 }
 
+if [[ Darwin = $(uname) ]]; then
+
 readlink() {
   gfix readlink "$@"
 }
@@ -29,3 +31,5 @@ date() {
 stat() {
   gfix stat "$@"
 }
+
+fi
