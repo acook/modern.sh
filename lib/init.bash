@@ -1,8 +1,9 @@
-#!/usr/bin/env bash
+# INIT
+#
+# Basic initialization.
+# Don't overwrite these values manually.
 
 set -o nounset
-
-# STARTUP
 
 if [[ -z ${_BASH_SHARED_LIB+unset} ]]; then
   declare -a _BASH_SHARED_LIB
