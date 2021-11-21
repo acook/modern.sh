@@ -1,4 +1,4 @@
-
+#!/usr/bin/env bash
 
 say()  { echo -ne " -- ($(scriptname) @ $(ts)) : $*\n"; }
 
