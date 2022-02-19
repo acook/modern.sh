@@ -40,7 +40,7 @@ cat doc/help.ansi
 Plans
 =====
 
-I've used a lot of these functions for many years, copied form project to project, but this version was extracted from my `blacklight` programming language build script.
+I've used a lot of these functions for many years, copied from project to project, but this version was extracted from my `blacklight` programming language [build scripts](https://github.com/acook/blacklight/blob/redlight/build/lib/_shared.bash).
 
-While I mainly use `fish` and `zsh` interactively, `modern.sh` currently heavily depends on bash-isms due to it being readily available on all platforms I have come into contact as well as having a decent set of primitives to build on. While that has been a safe assumption for the last couple of decades, it is no longer the case. Making it `zsh` compatible will not be a stretch. Eventually `modern.sh` will grow a deeper compatibility layer to allow it to run on dash and busybox or similar.
+While I mainly use `fish` interactively, `modern.sh` currently heavily depends on bash-isms due to it being readily available on all platforms I have come into contact as well as having a decent set of primitives to build on. While that has been a safe assumption for the last couple of decades, it is no longer the case. Making it `zsh` compatible will not be a stretch. Eventually `modern.sh` will grow a deeper compatibility layer to allow it to run on `dash` and `busybox` or similar.
 
