@@ -5,9 +5,9 @@ Modern helpers for shell scripting.
 ----
 
 I end up using a lot of shell scripting for portability and efficiency reasons.
-As designed it is great for glue logic. But it has a lot of gaps.
+As designed it is great for glue logic. But shell scripting has a lot of gaps.
 
-This provides such capabilities as:
+`modern.sh` fills some of these gaps by providing such capabilities as:
 
 - Including scripts as libraries - and ensuring they're only loaded once
 - Compatibility stubs and wrappers to ease development between Linux and BSD-like environments
