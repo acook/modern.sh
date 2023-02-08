@@ -20,12 +20,14 @@ command_exists() { command -v "$1" > /dev/null 2>&1; }
 # example: run "compile" clang thing.c
 # display command to run, confirm it exists, run it, output a warning on failure
 run() {
+  local EXITSTATUS
+  
   say "running $1 command: \`${*:2}\`"
   if command_exists "$2"; then
     "${@:2}"
-    ret=$?
-    [[ $ret ]] || warn "$1 command exited with status code $?"
-    return $ret
+    EXITSTATUS=$?
+    [[ $EXITSTATUS ]] || warn "$1 command exited with status code $EXITSTATUS"
+    return $EXITSTATUS
   else
     warn "command \`$2\` not found"
     return 255
@@ -36,7 +38,9 @@ run() {
 # example: run_or_die "download dependencies" curl -O package.pkg
 # as run, but die if command missing or exits with an error
 run_or_die() {
-  say "running $1 command: \`${*:2}\`"
-  command_exists "$2" || die "command \`$2\` not found"
-  $2 "${@:3}" || die_status $? "$2 command"
+  local EXITSTATUS
+
+  run "$@"
+  EXITSTATUS=$?
+  [[ $EXITSTATUS ]] || die_status $EXITSTATUS "$2 command"
 }
