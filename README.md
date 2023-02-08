@@ -28,7 +28,7 @@ source "$(which modern.sh)"
 If you set it up as a library in a relative path and aren't sure where it might end up, then you'll need to do something like this (where `libpath` is the relative path from your script):
 
 ```shell
-source "$(dirname ${BASH_SOURCE[0]})/libpath/modern.bash"
+source "$(dirname "${BASH_SOURCE[0]}")/libpath/modern.bash"
 ```
 
 Pretty much every function is documented in `doc/help.ansi`, just display it in your terminal or an ansi-capable editor to read more:
