@@ -50,6 +50,8 @@ include() {
 # example: load_nonfatal missing_script.sh
 # source a script once or more, warning on errors
 load_nonfatal() {
+  local EXITSTATUS
+
   if [[ ! -f $1 ]]; then
     warn "load: file \`$1\` not found"
     return 255
@@ -70,10 +72,11 @@ load_nonfatal() {
 # example: load vital_script.sh
 # source a script once or more, exiting if it is missing or returns an error
 load() {
+  local EXITSTATUS
   load_nonfatal "$1"
   EXITSTATUS=$?
   _set_scriptcurrent
-  [[ $EXITSTATUS -eq 0 ]] || die_status $? "error loading \`$1\`"
+  [[ $EXITSTATUS -eq 0 ]] || die_status $EXITSTATUS "error loading \`$1\`"
 }
 
 # usage: bash_trace
