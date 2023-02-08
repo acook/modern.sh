@@ -21,7 +21,7 @@ command_exists() { command -v "$1" > /dev/null 2>&1; }
 # display command to run, confirm it exists, run it, output a warning on failure
 run() {
   local EXITSTATUS
-  
+
   say "running $1 command: \`${*:2}\`"
   if command_exists "$2"; then
     "${@:2}"
