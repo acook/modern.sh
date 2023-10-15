@@ -6,7 +6,12 @@ source ../modern.sh
 say "building new monolithic library..."
 setup() { echo > ,; esc="$(printf '\033')"; }
 teardown() { rm ,; }
-compile() { cat display.bash , script.bash , exit.bash , time.bash , utility.bash , wrappers.bash , compatibility.bash , init.bash; }
+compile() {
+  cat \
+  init.bash , \
+  display.bash , script.bash , exit.bash , time.bash , utility.bash , wrappers.bash , compatibility.bash , \
+  finalize.bash;
+}
 comments() { \grep ${1:-} '^\s*#'; }
 no_comments() { comments -v; }
 
