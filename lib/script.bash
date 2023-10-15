@@ -97,7 +97,7 @@ bash_trace() {
 # used internally to set the current script global
 # if this gets broken all hell breaks loose
 _set_scriptcurrent() {
-  local fallback=${BASH_SOURCE[2]}
+  local fallback=${BASH_SOURCE[2]:-BASH_SOURCE[0]}
   local script=${1:-$fallback}
 
   SCRIPT_CURRENT_PATH=$(readlink -m "$script");
