@@ -1,6 +1,49 @@
 #!/usr/bin/env bash
+set -o nounset
 
-say()  { echo -ne " -- ($(scriptname) @ $(ts)) : $*\n"; }
+if [[ -z ${_BASH_SHARED_LIB+unset} ]]; then
+  declare -a _BASH_SHARED_LIB
+  _BASH_SHARED_LIB=("$(readlink -e "${BASH_SOURCE[0]}")")
+else
+  return 0
+fi
+
+MODERN_SCRIPT_QUIET=""
+export MODERN_SCRIPT_QUIET
+
+MODERN_SCRIPT_ARGS=( )
+export MODERN_SCRIPT_ARGS
+
+MODERN_SCRIPT_ARGS_UNKNOWN=( )
+export MODERN_SCRIPT_ARGS_UNKNOWN
+
+while (( $# )); do
+  case $1 in
+    "quiet")
+      MODERN_SCRIPT_QUIET=true
+    ;;
+    *)
+      MODERN_SCRIPT_ARGS_UNKNOWN+=( "$1" )
+    ;;
+  esac
+
+  MODERN_SCRIPT_ARGS+=( "$1" )
+  shift
+done
+
+if [[ $MODERN_SCRIPT_QUIET != "true" ]]; then
+  echo " -- ($(basename "$(dirname "$(readlink -m "${BASH_SOURCE[-1]}")")")/$(basename "${BASH_SOURCE[-1]}") @ $(date "+%Y-%m-%d %T")) : setting up..." >&2
+fi
+
+
+
+say()  {
+  if [[ $MODERN_SCRIPT_QUIET == "true" ]]; then
+    echo -ne " -- $*\n";
+  else
+    echo -ne " -- ($(scriptname) @ $(ts)) : $*\n";
+  fi
+}
 
 warn() { say "$*" >&2; }
 
@@ -128,7 +171,7 @@ bash_trace() {
 }
 
 _set_scriptcurrent() {
-  local fallback=${BASH_SOURCE[2]}
+  local fallback=${BASH_SOURCE[2]:-BASH_SOURCE[0]}
   local script=${1:-$fallback}
 
   SCRIPT_CURRENT_PATH=$(readlink -m "$script");
@@ -258,17 +301,6 @@ if [[ Darwin = $(uname) ]]; then
 
 fi
 
-
-set -o nounset
-
-if [[ -z ${_BASH_SHARED_LIB+unset} ]]; then
-  declare -a _BASH_SHARED_LIB
-  _BASH_SHARED_LIB=("$(readlink -e "${BASH_SOURCE[0]}")")
-else
-  return 0
-fi
-
-echo " -- ($(basename "$(dirname "$(readlink -m "${BASH_SOURCE[-1]}")")")/$(basename "${BASH_SOURCE[-1]}") @ $(date "+%Y-%m-%d %T")) : setting up..." >&2
 
 SCRIPT_SHARED_PATH="$(readlink -e "${BASH_SOURCE[0]}")"
 SCRIPT_SHARED_NAME="$(basename "$SCRIPT_SHARED_PATH")"
