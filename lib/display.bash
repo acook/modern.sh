@@ -8,7 +8,13 @@
 # usage: say <text>
 # example: say 'articulating splines'
 # intended for stdout logging and information about current actions
-say()  { echo -ne " -- ($(scriptname) @ $(ts)) : $*\n"; }
+say()  {
+  if [[ $MODERN_SCRIPT_QUIET == "true" ]]; then
+    echo -ne " -- $*\n";
+  else
+    echo -ne " -- ($(scriptname) @ $(ts)) : $*\n";
+  fi
+}
 
 # usage: warn <text>
 # example: warn 'that is one doomed space marine'
