@@ -105,6 +105,10 @@ ansiup() {
   echo -ne "\e[$1""A"
 }
 
+hilite() {
+    REGEX_SED=$(echo $1 | sed "s/[|()]/\\\&/g");
+    sed "s/$REGEX_SED/$2&$(colorreset)/g"
+}
 
 
 
