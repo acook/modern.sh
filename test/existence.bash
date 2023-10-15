@@ -7,6 +7,7 @@ echo "Source test..."
 (
   source "$(dirname "${BASH_SOURCE[0]}")/../modern.sh"
   say "$(scriptname)"
+  echo -e "1. foo bar baz\n2. nothing highlighted\n3. bar bar jar" | hilite bar $(colorfg green)
 )
 
 echo "Standalone test..."
