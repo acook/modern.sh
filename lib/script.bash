@@ -94,8 +94,10 @@ bash_trace() {
 
 # usage: _set_scriptcurrent
 # example: _set_scriptcurrent
-# used internally to set the current script global
-# if this gets broken all hell breaks loose
+# used internally to set the current script global used by `scriptsame` and `scriptname`
+# if this gets broken then:
+# - `scriptname`: it may become difficult to trace errors as reported messages will incorrectly identify the script they originated from
+# - `scriptsame`: files which can be used as both a library and an executable will no longer be able to determine what they should be doing
 _set_scriptcurrent() {
   local fallback=${BASH_SOURCE[2]:-BASH_SOURCE[0]}
   local script=${1:-$fallback}
