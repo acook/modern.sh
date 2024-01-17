@@ -3,30 +3,42 @@
 # Finalization of setup.
 # Don't overwrite these values manually.
 
-SCRIPT_SHARED_PATH="$(readlink -e "${BASH_SOURCE[0]}")" # get the full path to this file being included
-SCRIPT_SHARED_NAME="$(basename "$SCRIPT_SHARED_PATH")"  # name of this file being included (typically "modern.sh")
-SCRIPT_SHARED_DIR="$(dirname "$SCRIPT_SHARED_PATH")"    # directory that contains this file being included
-SCRIPT_ORIG_PWD="$(pwd -P)"                             # directory that execution began in, should we need to reference it later
+# directory that execution began in
+# useful if we lose track of where we started after `cd`
+MODERN_SCRIPT_ORIG_PWD="$(pwd -P)"
 
-SCRIPT_MAIN_PATH="$(readlink -e "$0")"                  # get the full path to the file that was originally run, which later included this file
-SCRIPT_MAIN_NAME="$(basename "$SCRIPT_MAIN_PATH")"      # name of the file that was originally run
-SCRIPT_MAIN_DIR="$(dirname "$SCRIPT_MAIN_PATH")"        # directory that contains the file that was originally run
-SCRIPT_MAIN_EXE="$(basename "$SCRIPT_MAIN_DIR")/$SCRIPT_MAIN_NAME" # reconstruct the full path, should be identical to SCRIPT_MAIN_PATH
+# get the full path to this file being included (typically ending in "modern.sh")
+MODERN_SCRIPT_FULLPATH="$(readlink -e "${BASH_SOURCE[0]}")"
+# name of this file being included (typically "modern.sh")
+MODERN_SCRIPT_NAME="$(basename "$MODERN_SCRIPT_FULLPATH")"
+# directory that contains this file being included
+# particularly useful if we want to store other libraries relative to it
+MODERN_SCRIPT_DIR="$(dirname "$MODERN_SCRIPT_FULLPATH")"
 
-# initialize the SCRIPT_CURRENT_PATH variable
-# will be overwritten by _set_scriptcurrent
-SCRIPT_CURRENT_PATH=$SCRIPT_SHARED_PATH
+# get the full path to the script that was originally run
+# this is typically the one that later included modern.sh
+MODERN_MAIN_FULLPATH="$(readlink -e "$0")"
+# name of the file that was originally run
+MODERN_MAIN_NAME="$(basename "$MODERN_MAIN_FULLPATH")"
+# directory that contains the file that was originally run
+MODERN_MAIN_DIR="$(dirname "$MODERN_MAIN_FULLPATH")"
+# reconstruct the full path, should be identical to SCRIPT_MAIN_PATH, but not always
+MODERN_MAIN_EXE="$(basename "$MODERN_MAIN_DIR")/$MODERN_MAIN_NAME"
 
-export SCRIPT_SHARED_PATH
-export SCRIPT_SHARED_NAME
-export SCRIPT_SHARED_DIR
-export SCRIPT_ORIG_PWD
+# initialize the MODERN_CURRENT_FULLPATH variable before it is exported
+# will be overwritten by _set_current_script shortly
+MODERN_CURRENT_FULLPATH=$MODERN_SCRIPT_FULLPATH
 
-export SCRIPT_MAIN_PATH
-export SCRIPT_MAIN_NAME
-export SCRIPT_MAIN_DIR
-export SCRIPT_MAIN_EXE
+export MODERN_SCRIPT_FULLPATH
+export MODERN_SCRIPT_NAME
+export MODERN_SCRIPT_DIR
+export MODERN_SCRIPT_DIR
 
-export SCRIPT_CURRENT_PATH
+export MODERN_MAIN_FULLPATH
+export MODERN_MAIN_NAME
+export MODERN_MAIN_DIR
+export MODERN_MAIN_EXE
 
-_set_scriptcurrent
+export MODERN_CURRENT_FULLPATH
+
+_set_current_script
