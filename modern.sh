@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -o nounset
 
-if [[ -z ${_BASH_SHARED_LIB+unset} ]]; then
-  declare -a _BASH_SHARED_LIB
-  _BASH_SHARED_LIB=("$(readlink -e "${BASH_SOURCE[0]}")")
+if [[ -z ${_MODERN_LOADED_LIBS+unset} ]]; then
+  declare -a _MODERN_LOADED_LIBS
+  _MODERN_LOADED_LIBS=("$(readlink -e "${BASH_SOURCE[0]}")")
 else
   return 0
 fi
@@ -129,8 +129,8 @@ include() {
   if [[ ! -f $fullpath ]]; then
     die "unable to include \`$fullpath\`: file not found"
   fi
-  if [[ ! " ${_BASH_SHARED_LIB[*]} " == *" ${1} "* ]]; then
-    _BASH_SHARED_LIB+=("$1")
+  if [[ ! " ${_MODERN_LOADED_LIBS[*]} " == *" ${1} "* ]]; then
+    _MODERN_LOADED_LIBS+=("$1")
     _set_scriptcurrent "$fullpath"
     source "$fullpath" || die "error including $fullpath"
     _set_scriptcurrent
@@ -214,16 +214,6 @@ ts_file() { date --utc "+%Y-%m-%d-%H-%M-%S"; }
 ts_unix() { date "+%s.%N"; }
 
 
-realpath() {
-  p="$1"
-  while [[ -h $p ]]; do
-    d="$( cd -P "$( dirname "$p" )" && pwd )"
-    p="$(readlink -e "$p")"
-    [[ $p != /* ]] && p="$d/$p"
-  done
-  cd -P "$(dirname "$p")" && pwd
-}
-
 elapsed() {
   started_at=$1
   ended_at=$2
@@ -306,15 +296,15 @@ if [[ Darwin = $(uname) ]]; then
 fi
 
 
-SCRIPT_SHARED_PATH="$(readlink -e "${BASH_SOURCE[0]}")"
-SCRIPT_SHARED_NAME="$(basename "$SCRIPT_SHARED_PATH")"
-SCRIPT_SHARED_DIR="$(dirname "$SCRIPT_SHARED_PATH")"
-SCRIPT_ORIG_PWD="$(pwd -P)"
+SCRIPT_SHARED_PATH="$(readlink -e "${BASH_SOURCE[0]}")" # get the full path to this file being included
+SCRIPT_SHARED_NAME="$(basename "$SCRIPT_SHARED_PATH")"  # name of this file being included (typically "modern.sh")
+SCRIPT_SHARED_DIR="$(dirname "$SCRIPT_SHARED_PATH")"    # directory that contains this file being included
+SCRIPT_ORIG_PWD="$(pwd -P)"                             # directory that execution began in, should we need to reference it later
 
-SCRIPT_MAIN_PATH="$(readlink -e "$0")"
-SCRIPT_MAIN_NAME="$(basename "$SCRIPT_MAIN_PATH")"
-SCRIPT_MAIN_DIR="$(dirname "$SCRIPT_MAIN_PATH")"
-SCRIPT_MAIN_EXE="$(basename "$SCRIPT_MAIN_DIR")/$SCRIPT_MAIN_NAME"
+SCRIPT_MAIN_PATH="$(readlink -e "$0")"                  # get the full path to the file that was originally run, which later included this file
+SCRIPT_MAIN_NAME="$(basename "$SCRIPT_MAIN_PATH")"      # name of the file that was originally run
+SCRIPT_MAIN_DIR="$(dirname "$SCRIPT_MAIN_PATH")"        # directory that contains the file that was originally run
+SCRIPT_MAIN_EXE="$(basename "$SCRIPT_MAIN_DIR")/$SCRIPT_MAIN_NAME" # reconstruct the full path, should be identical to SCRIPT_MAIN_PATH
 
 SCRIPT_CURRENT_PATH=$SCRIPT_SHARED_PATH
 

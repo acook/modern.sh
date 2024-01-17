@@ -38,8 +38,8 @@
 [34m	[0msends the cursor up the specified number of lines
 
 [35musage:[0m hilite <matcher> <style>
-[34mexample:[0m echo "foo bar baz" | hilight bar $(colorfg green)
-[34m	[0mhighlights the matching text with the given color
+[34mexample:[0m echo "foo bar baz" | hilite bar $(colorfg green)
+[34m	[0mhighlights the matching text with the given style
 
 [35musage:[0m displayname <path>
 [34mexample:[0m displayname "$(pwd)"
@@ -76,8 +76,9 @@
 
 [35musage:[0m _set_scriptcurrent
 [34mexample:[0m _set_scriptcurrent
-[34m	[0mused internally to set the current script global
-[34m	[0mif this gets broken all hell breaks loose
+[34m	[0mused internally to set the current script global used by `scriptsame` and `scriptname`
+[34m	[0mif this gets broken then:
+[34m	[0m- `scriptname`: it may become difficult to trace errors as reported messages will incorrectly identify the script they originated from
 
 [35musage:[0m ok <message>
 [34mexample:[0m ok 'all good!'
@@ -109,10 +110,6 @@
 [34mexample:[0m start_time="$(ts_unix)"
 [34m	[0munix timestamp with nanoseconds
 [34m	[0mrequired by elapsed()
-
-[35musage:[0m realpath <path>
-[34m	[0mattempts to resolve all symlinks until the origin path is discovered
-[34m	[0mcircular symlinks will keep it looping forever
 
 [35musage:[0m elapsed <start_time> <end_time>
 [34m	[0mtakes two unix timestamps with nanoseconds
