@@ -20,9 +20,9 @@ echo "Quiet source test..."
 
 (
   source "$(dirname "${BASH_SOURCE[0]}")/../modern.sh" quiet
-  say "$MODERN_SCRIPT_QUIET"
-  say "${MODERN_SCRIPT_ARGS[@]}"
-  say "$MODERN_SCRIPT_ARGS"
+  say "$MODERN_QUIET"
+  say "${MODERN_ARGS[@]}"
+  say "$MODERN_ARGS"
 )
 
 echo "(end of quiet test)"

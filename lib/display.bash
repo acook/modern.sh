@@ -9,7 +9,7 @@
 # example: say 'articulating splines'
 # intended for stdout logging and information about current actions
 say()  {
-  if [[ $MODERN_SCRIPT_QUIET == "true" ]]; then
+  if [[ $MODERN_QUIET == "true" ]]; then
     echo -ne " -- $*\n";
   else
     echo -ne " -- ($(scriptname) @ $(ts)) : $*\n";
