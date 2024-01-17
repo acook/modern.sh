@@ -38,8 +38,8 @@ include() {
   if [[ ! -f $fullpath ]]; then
     die "unable to include \`$fullpath\`: file not found"
   fi
-  if [[ ! " ${_BASH_SHARED_LIB[*]} " == *" ${1} "* ]]; then
-    _BASH_SHARED_LIB+=("$1")
+  if [[ ! " ${_MODERN_LOADED_LIBS[*]} " == *" ${1} "* ]]; then
+    _MODERN_LOADED_LIBS+=("$1")
     _set_scriptcurrent "$fullpath"
     source "$fullpath" || die "error including $fullpath"
     _set_scriptcurrent

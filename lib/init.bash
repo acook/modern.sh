@@ -5,9 +5,9 @@
 
 set -o nounset
 
-if [[ -z ${_BASH_SHARED_LIB+unset} ]]; then
-  declare -a _BASH_SHARED_LIB
-  _BASH_SHARED_LIB=("$(readlink -e "${BASH_SOURCE[0]}")")
+if [[ -z ${_MODERN_LOADED_LIBS+unset} ]]; then
+  declare -a _MODERN_LOADED_LIBS
+  _MODERN_LOADED_LIBS=("$(readlink -e "${BASH_SOURCE[0]}")")
 else
   return 0
 fi
