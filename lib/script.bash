@@ -31,8 +31,10 @@ scriptcaller() { readlink -e "$(caller | cut -d " " -f2-)"; }
 scriptsame() { [[ $MODERN_MAIN_FULLPATH == "$MODERN_CURRENT_FULLPATH" ]]; }
 
 # usage: include <script>
-# example: include "time.bash"
+# example: include "time"
 # source a script only once
+# scripts are expected to be in the same path as modern.sh
+# and in the format of `_scriptname.bash`
 include() {
   local fullpath="$MODERN_SCRIPT_DIR/_$1.bash"
   if [[ ! -f $fullpath ]]; then
