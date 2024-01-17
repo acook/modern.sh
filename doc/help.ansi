@@ -59,8 +59,10 @@
 [34m	[0mfor conditionals, determines if caller is the same as the main parent script
 
 [35musage:[0m include <script>
-[34mexample:[0m include "time.bash"
+[34mexample:[0m include "time"
 [34m	[0msource a script only once
+[34m	[0mscripts are expected to be in the same path as modern.sh
+[34m	[0mand in the format of `_scriptname.bash`
 
 [35musage:[0m load_nonfatal <script>
 [34mexample:[0m load_nonfatal missing_script.sh
