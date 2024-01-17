@@ -118,22 +118,22 @@ displayname() {
   basename "$1"
 }
 
-scriptname() { displayname "$SCRIPT_CURRENT_PATH"; }
+scriptname() { displayname "$MODERN_CURRENT_FULLPATH"; }
 
 scriptcaller() { readlink -e "$(caller | cut -d " " -f2-)"; }
 
-scriptsame() { [[ $SCRIPT_MAIN_PATH == "$SCRIPT_CURRENT_PATH" ]]; }
+scriptsame() { [[ $MODERN_MAIN_FULLPATH == "$MODERN_CURRENT_FULLPATH" ]]; }
 
 include() {
-  local fullpath="$SCRIPT_SHARED_DIR/_$1.bash"
+  local fullpath="$MODERN_SCRIPT_DIR/_$1.bash"
   if [[ ! -f $fullpath ]]; then
     die "unable to include \`$fullpath\`: file not found"
   fi
   if [[ ! " ${_MODERN_LOADED_LIBS[*]} " == *" ${1} "* ]]; then
     _MODERN_LOADED_LIBS+=("$1")
-    _set_scriptcurrent "$fullpath"
+    _set_current_script "$fullpath"
     source "$fullpath" || die "error including $fullpath"
-    _set_scriptcurrent
+    _set_current_script
   fi
 }
 
@@ -145,10 +145,10 @@ load_nonfatal() {
     return 255
   fi
 
-  _set_scriptcurrent "$1"
+  _set_current_script "$1"
   source "$1"
   EXITSTATUS=$?
-  _set_scriptcurrent
+  _set_current_script
 
   if [[ $EXITSTATUS -ne 0 ]]; then
     warn "load: \`$1\` gave exit status $EXITSTATUS"
@@ -160,7 +160,7 @@ load() {
   local EXITSTATUS
   load_nonfatal "$1"
   EXITSTATUS=$?
-  _set_scriptcurrent
+  _set_current_script
   [[ $EXITSTATUS -eq 0 ]] || die_status $EXITSTATUS "error loading \`$1\`"
 }
 
@@ -174,11 +174,11 @@ bash_trace() {
   echo BASH
 }
 
-_set_scriptcurrent() {
+_set_current_script() {
   local fallback=${BASH_SOURCE[2]:-BASH_SOURCE[0]}
   local script=${1:-$fallback}
 
-  SCRIPT_CURRENT_PATH=$(readlink -m "$script");
+  MODERN_CURRENT_FULLPATH=$(readlink -m "$script");
 }
 
 
@@ -296,28 +296,29 @@ if [[ Darwin = $(uname) ]]; then
 fi
 
 
-SCRIPT_SHARED_PATH="$(readlink -e "${BASH_SOURCE[0]}")" # get the full path to this file being included
-SCRIPT_SHARED_NAME="$(basename "$SCRIPT_SHARED_PATH")"  # name of this file being included (typically "modern.sh")
-SCRIPT_SHARED_DIR="$(dirname "$SCRIPT_SHARED_PATH")"    # directory that contains this file being included
-SCRIPT_ORIG_PWD="$(pwd -P)"                             # directory that execution began in, should we need to reference it later
+MODERN_SCRIPT_ORIG_PWD="$(pwd -P)"
 
-SCRIPT_MAIN_PATH="$(readlink -e "$0")"                  # get the full path to the file that was originally run, which later included this file
-SCRIPT_MAIN_NAME="$(basename "$SCRIPT_MAIN_PATH")"      # name of the file that was originally run
-SCRIPT_MAIN_DIR="$(dirname "$SCRIPT_MAIN_PATH")"        # directory that contains the file that was originally run
-SCRIPT_MAIN_EXE="$(basename "$SCRIPT_MAIN_DIR")/$SCRIPT_MAIN_NAME" # reconstruct the full path, should be identical to SCRIPT_MAIN_PATH
+MODERN_SCRIPT_FULLPATH="$(readlink -e "${BASH_SOURCE[0]}")"
+MODERN_SCRIPT_NAME="$(basename "$MODERN_SCRIPT_FULLPATH")"
+MODERN_SCRIPT_DIR="$(dirname "$MODERN_SCRIPT_FULLPATH")"
 
-SCRIPT_CURRENT_PATH=$SCRIPT_SHARED_PATH
+MODERN_MAIN_FULLPATH="$(readlink -e "$0")"
+MODERN_MAIN_NAME="$(basename "$MODERN_MAIN_FULLPATH")"
+MODERN_MAIN_DIR="$(dirname "$MODERN_MAIN_FULLPATH")"
+MODERN_MAIN_EXE="$(basename "$MODERN_MAIN_DIR")/$MODERN_MAIN_NAME"
 
-export SCRIPT_SHARED_PATH
-export SCRIPT_SHARED_NAME
-export SCRIPT_SHARED_DIR
-export SCRIPT_ORIG_PWD
+MODERN_CURRENT_FULLPATH=$MODERN_SCRIPT_FULLPATH
 
-export SCRIPT_MAIN_PATH
-export SCRIPT_MAIN_NAME
-export SCRIPT_MAIN_DIR
-export SCRIPT_MAIN_EXE
+export MODERN_SCRIPT_FULLPATH
+export MODERN_SCRIPT_NAME
+export MODERN_SCRIPT_DIR
+export MODERN_SCRIPT_DIR
 
-export SCRIPT_CURRENT_PATH
+export MODERN_MAIN_FULLPATH
+export MODERN_MAIN_NAME
+export MODERN_MAIN_DIR
+export MODERN_MAIN_EXE
 
-_set_scriptcurrent
+export MODERN_CURRENT_FULLPATH
+
+_set_current_script

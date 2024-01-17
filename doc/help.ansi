@@ -74,8 +74,8 @@
 [34mexample:[0m bash_trace
 [34m	[0mfor debugging bash functions
 
-[35musage:[0m _set_scriptcurrent
-[34mexample:[0m _set_scriptcurrent
+[35musage:[0m _set_current_script
+[34mexample:[0m _set_current_script
 [34m	[0mused internally to set the current script global used by `scriptsame` and `scriptname`
 [34m	[0mif this gets broken then:
 [34m	[0m- `scriptname`: it may become difficult to trace errors as reported messages will incorrectly identify the script they originated from
