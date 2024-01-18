@@ -12,7 +12,7 @@ else
   return 0
 fi
 
-MODERN_QUIET="${MODERN_QUIET:-}"
+MODERN_QUIET="${MODERN_QUIET:-false}"
 export MODERN_QUIET
 
 MODERN_ARGS=( )
@@ -21,10 +21,12 @@ export MODERN_ARGS
 MODERN_ARGS_UNKNOWN=( )
 export MODERN_ARGS_UNKNOWN
 
+MODERN_PROCESS_ARGS="${MODERN_PROCESS_ARGS:-false}"
+
 # if MODERN_PROCESS_ARGS is set to "true" then
 # we will consume all arguments here and put them in MODERN_ARGS
 # and store any we don't recogize in MODERN_ARGS_UNKNOWN
-if [[ MODERN_PROCESS_ARGS == "true" ]]; then
+if [[ $MODERN_PROCESS_ARGS == "true" ]]; then
   while (( $# )); do
     case $1 in
       "quiet")

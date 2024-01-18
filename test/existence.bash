@@ -19,10 +19,13 @@ echo "Standalone test..."
 echo "Quiet source test..."
 
 (
-  source "$(dirname "${BASH_SOURCE[0]}")/../modern.sh" quiet
+  MODERN_PROCESS_ARGS=true
+  export MODERN_PROCESS_ARGS
+  source "$(dirname "${BASH_SOURCE[0]}")/../modern.sh" quiet unknown
   say "$MODERN_QUIET"
   say "${MODERN_ARGS[@]}"
   say "$MODERN_ARGS"
+  say "$MODERN_ARGS_UNKNOWN"
 )
 
 echo "(end of quiet test)"
