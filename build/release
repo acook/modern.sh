@@ -3,6 +3,8 @@
 cd "$(dirname "${BASH_SOURCE[0]}")/../lib"
 source ../modern.sh
 
+outfile="../modern.sh"
+
 say "building new monolithic library..."
 setup() { echo > ,; esc="$(printf '\033')"; }
 teardown() { rm ,; }
@@ -28,10 +30,10 @@ no_comments() { comments -v; }
 
 setup
 
-compile | no_comments | nl_squeeze > ../modern.sh
+compile | no_comments | nl_squeeze > "$outfile"
 say "Adding Shebang..."
-awk 'BEGIN{print "#!/usr/bin/env bash"} {print}' ../modern.sh > tmpfile && mv tmpfile ../modern.sh
-run "Set Executable" chmod +x ../modern.sh
+awk 'BEGIN{print "#!/usr/bin/env bash"} {print}' "$outfile" > tmpfile && mv tmpfile "$outfile"
+run "Set Executable" chmod +x "$outfile"
 
 say "building documentation..."
 usages() { \grep '^\s*# usage:' -A 4; }
