@@ -1,4 +1,13 @@
 
+[35musage:[0m gfix <command> <opts>
+[34mexample:[0m gfix readlink -m .
+[34m	[0mwill try to prefix the command with a g, as homebrew and other non-native tools providing gnu userspace tools tend to do
+[34m	[0mnewer versions of macOS have broken the ability to reliably modify the path in subshells meaning that even if you include the homebrew path it may not find them
+
+[35musage:[0m array_contains <needle> <haystack>
+[34mexample:[0m array_contains "entry" "$list"
+[34m	[0m!! BROKEN !!
+
 [35musage:[0m say <text>
 [34mexample:[0m say 'articulating splines'
 [34m	[0mintended for stdout logging and information about current actions
@@ -41,6 +50,29 @@
 [34mexample:[0m echo "foo bar baz" | hilite bar $(colorfg green)
 [34m	[0mhighlights the matching text with the given style
 
+[35musage:[0m ok <message>
+[34mexample:[0m ok 'all good!'
+[34m	[0mformatted success message and exit
+[34m	[0mmessage is optional
+
+[35musage:[0m die <message>
+[34mexample:[0m die 'hit the road jack'
+[34m	[0mformatted failure message and exit
+[34m	[0mmessage is optional
+
+[35musage:[0m die_status <status> [message]
+[34mexample:[0m die_status 255 "file not found"
+[34m	[0mformatted failure message and exit with specified status code
+
+[35musage:[0m quit_status <status> [message]
+[34mexample:[0m quit_status $? "last command exited"
+[34m	[0mautomatically selects the correct exit function based on context
+
+[35musage:[0m resolvepath <path>
+[34m	[0mattempts to resolve all symlinks until the origin path is discovered
+[34m	[0mcircular symlinks will keep it looping forever
+[34m	[0msee also: `man realpath(1)` on some systems
+
 [35musage:[0m displayname <path>
 [34mexample:[0m displayname "$(pwd)"
 [34m	[0mtakes a path and generates "last_folder/filename" string
@@ -82,24 +114,6 @@
 [34m	[0mif this gets broken then:
 [34m	[0m- `scriptname`: it may become difficult to trace errors as reported messages will incorrectly identify the script they originated from
 
-[35musage:[0m ok <message>
-[34mexample:[0m ok 'all good!'
-[34m	[0mformatted success message and exit
-[34m	[0mmessage is optional
-
-[35musage:[0m die <message>
-[34mexample:[0m die 'hit the road jack'
-[34m	[0mformatted failure message and exit
-[34m	[0mmessage is optional
-
-[35musage:[0m die_status <status> [message]
-[34mexample:[0m die_status 255 "file not found"
-[34m	[0mformatted failure message and exit with specified status code
-
-[35musage:[0m quit_status <status> [message]
-[34mexample:[0m quit_status $? "last command exited"
-[34m	[0mautomatically selects the correct exit function based on context
-
 [35musage:[0m ts
 [34mexample:[0m echo "The time is $(ts)
 [34m	[0mlocal timestamp for output
@@ -133,8 +147,3 @@
 [35musage:[0m run_or_die "title" <command> [args]
 [34mexample:[0m run_or_die "download dependencies" curl -O package.pkg
 [34m	[0mas run, but die if command missing or exits with an error
-
-[35musage:[0m gfix <command> <opts>
-[34mexample:[0m gfix readlink -m .
-[34m	[0mwill try to prefix the command with a g, as homebrew and other non-native tools providing gnu userspace tools tend to do
-[34m	[0mnewer versions of macOS have broken the ability to reliably modify the path in subshells meaning that even if you include the homebrew path it may not find them
