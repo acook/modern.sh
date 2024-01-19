@@ -1,9 +1,4 @@
 
-[35musage:[0m gfix <command> <opts>
-[34mexample:[0m gfix readlink -m .
-[34m	[0mwill try to prefix the command with a g, as homebrew and other non-native tools providing gnu userspace tools tend to do
-[34m	[0mnewer versions of macOS have broken the ability to reliably modify the path in subshells meaning that even if you include the homebrew path it may not find them
-
 [35musage:[0m array_contains <needle> <haystack>
 [34mexample:[0m array_contains "entry" "$list"
 [34m	[0m!! BROKEN !!
@@ -147,3 +142,9 @@
 [35musage:[0m run_or_die "title" <command> [args]
 [34mexample:[0m run_or_die "download dependencies" curl -O package.pkg
 [34m	[0mas run, but die if command missing or exits with an error
+
+[35musage:[0m gfix <command> <opts>
+[34mexample:[0m gfix readlink -m .
+[34m	[0mwill try to prefix the command with a g, as homebrew and other non-native tools providing gnu userspace tools tend to do
+[34m	[0mnewer versions of macOS have broken the ability to reliably modify the path in subshells meaning that even if you include the homebrew path it may not find them
+

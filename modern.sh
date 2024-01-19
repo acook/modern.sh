@@ -39,47 +39,12 @@ if [[ $MODERN_QUIET != "true" ]]; then
   echo " -- ($(basename "$(dirname "$(readlink -m "${BASH_SOURCE[-1]}")")")/$(basename "${BASH_SOURCE[-1]}") @ $(date "+%Y-%m-%d %T")) : setting up..." >&2
 fi
 
-
-gfix() {
-  if command_exists "g$1"; then
-    "g$1" "${@:2}"
-  else
-    "$1"
-  fi
-}
-
-if [[ Darwin = $(uname) ]]; then
-
-  readlink() {
-    gfix readlink "$@"
-  }
-
-  basename() {
-    gfix basename "$@"
-  }
-
-  date() {
-    gfix date "$@"
-  }
-
-  stat() {
-    gfix stat "$@"
-  }
-
-fi
-
-
 array_contains () {
   local e match="$1"
   shift
   for e; do [[ "$e" == "$match" ]] && return 0; done
   return 1
 }
-
-
-
-
-
 
 say()  {
   if [[ $MODERN_QUIET == "true" ]]; then
@@ -154,8 +119,6 @@ hilite() {
     sed "s/$REGEX_SED/$2&$(colorreset)/g"
 }
 
-
-
 ok()   { say "\e[32m(ok) $*\e[0m"; exit 0; }
 
 die()  { warn "\e[31m(die) $*\e[0m"; exit 1; }
@@ -179,7 +142,6 @@ quit_status() {
   fi
 }
 
-
 resolvepath() {
   p="$1"
   while [[ -h $p ]]; do
@@ -193,8 +155,6 @@ resolvepath() {
 thisdir() {
   dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")"
 }
-
-
 
 displayname() {
   basename -z "$(dirname "$(readlink -m "$1")")" | tr -d '\0'
@@ -265,13 +225,11 @@ _set_current_script() {
   MODERN_CURRENT_FULLPATH=$(readlink -m "$script");
 }
 
-
 ts()      { date "+%Y-%m-%d %T"; }
 
 ts_file() { date --utc "+%Y-%m-%d-%H-%M-%S"; }
 
 ts_unix() { date "+%s.%N"; }
-
 
 elapsed() {
   started_at=$1
@@ -292,8 +250,6 @@ elapsed() {
     warn "END: $ended_at"
   fi
 }
-
-
 
 safe_cd() {
   say "entering directory \`$1\`"
@@ -325,6 +281,33 @@ run_or_die() {
   [[ $EXITSTATUS ]] || die_status $EXITSTATUS "$2 command"
 }
 
+gfix() {
+  if command_exists "g$1"; then
+    "g$1" "${@:2}"
+  else
+    "$1"
+  fi
+}
+
+if [[ Darwin = $(uname) ]]; then
+
+  readlink() {
+    gfix readlink "$@"
+  }
+
+  basename() {
+    gfix basename "$@"
+  }
+
+  date() {
+    gfix date "$@"
+  }
+
+  stat() {
+    gfix stat "$@"
+  }
+
+fi
 
 MODERN_SCRIPT_ORIG_PWD="$(pwd -P)"
 
@@ -352,3 +335,4 @@ export MODERN_MAIN_EXE
 export MODERN_CURRENT_FULLPATH
 
 _set_current_script
+
