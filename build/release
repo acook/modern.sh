@@ -9,7 +9,15 @@ teardown() { rm ,; }
 compile() {
   cat \
   init.bash , \
-  display.bash , script.bash , exit.bash , time.bash , utility.bash , wrappers.bash , compatibility.bash , \
+  compatibility.bash , \
+  data.bash , \
+  display.bash , \
+  exit.bash , \
+  paths.bash , \
+  script.bash , \
+  time.bash , \
+  utility.bash , \
+  wrappers.bash , \
   finalize.bash;
 }
 comments() { \grep ${1:-} '^\s*#'; }
