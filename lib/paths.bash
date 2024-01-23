@@ -21,7 +21,7 @@ resolvepath() {
 
 # simple way to get the path of the running file
 thisdir() {
-  dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")"
+  dirname -- "$(scriptcaller)"
 }
 # `readlink -f` may not work on BSD systems while `stat -f` or `realpath` would
 # `$0` doesn't work if the file is sourced
