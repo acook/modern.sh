@@ -153,7 +153,7 @@ resolvepath() {
 }
 
 thisdir() {
-  dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")"
+  dirname -- "$(scriptcaller)"
 }
 
 displayname() {
@@ -321,6 +321,8 @@ MODERN_MAIN_DIR="$(dirname "$MODERN_MAIN_FULLPATH")"
 MODERN_MAIN_EXE="$(basename "$MODERN_MAIN_DIR")/$MODERN_MAIN_NAME"
 
 MODERN_CURRENT_FULLPATH=$MODERN_SCRIPT_FULLPATH
+
+export MODERN_SCRIPT_ORIG_PWD
 
 export MODERN_SCRIPT_FULLPATH
 export MODERN_SCRIPT_NAME
