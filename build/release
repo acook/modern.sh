@@ -11,17 +11,8 @@ teardown() { rm ,; }
 compile() {
   cat \
   core/preamble.bash , \
-  \
-  data.bash , \
-  display.bash , \
-  exit.bash , \
-  paths.bash , \
-  script.bash , \
-  time.bash , \
-  utility.bash , \
-  wrappers.bash , \
-  \
-  compatibility.bash , \
+  $(git ls *.bash | sort | xargs -I'{}' echo -n '{} , ') \
+  core/compatibility.bash , \
   core/finalize.bash;
 }
 nl_squeeze() { awk 'BEGIN{RS="";ORS="\n\n"}1' ;}
