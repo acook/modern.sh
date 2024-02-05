@@ -10,7 +10,7 @@ setup() { echo > ,; esc="$(printf '\033')"; }
 teardown() { rm ,; }
 compile() {
   cat \
-  init.bash , \
+  core/preamble.bash , \
   \
   data.bash , \
   display.bash , \
@@ -22,7 +22,7 @@ compile() {
   wrappers.bash , \
   \
   compatibility.bash , \
-  finalize.bash;
+  core/finalize.bash;
 }
 nl_squeeze() { awk 'BEGIN{RS="";ORS="\n\n"}1' ;}
 comments() { \grep ${1:-} '^\s*#'; }
