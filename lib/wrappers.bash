@@ -14,7 +14,7 @@ safe_cd() {
 # usage: command_exists <command_name>
 # example: if command_exists lsb_release; lsb_release -ds; fi
 # used in conditionals to determine presence of a command or executable
-command_exists() { command -v "$1" > /dev/null 2>&1; }
+command_exists() { command -v "$1" 1>&- 2>&-; }
 
 # usage: run "title" <command> [args]
 # example: run "compile" clang thing.c
