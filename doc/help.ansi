@@ -63,6 +63,16 @@
 [34mexample:[0m quit_status $? "last command exited"
 [34m	[0mautomatically selects the correct exit function based on context
 
+[35musage:[0m txcp <host> <local_filename> <remote_filename>
+[34mexample:[0m txcp me@example.com asciiart.txt motd.txt
+[34m	[0msend a local file to a remote host using only SSH
+    [34m	[0mshellcheck disable=SC2029
+
+[35musage:[0m rxcp <host> <remote_filename> <local_filename>
+[34mexample:[0m txcp me@example.com garbage.bak davinci.dat
+[34m	[0msend a local file to a remote host using only SSH
+  [34m	[0mshellcheck disable=SC2029
+
 [35musage:[0m resolvepath <path>
 [34m	[0mattempts to resolve all symlinks until the origin path is discovered
 [34m	[0mcircular symlinks will keep it looping forever

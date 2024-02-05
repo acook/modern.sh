@@ -142,6 +142,14 @@ quit_status() {
   fi
 }
 
+txcp() {
+    ssh "$1" "cat > '$3'" < "$2"
+}
+
+rxcp() {
+  ssh "$1" "cat $2" > "$3"
+}
+
 resolvepath() {
   p="$1"
   while [[ -h $p ]]; do
