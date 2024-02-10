@@ -73,6 +73,20 @@
 [34m	[0msend a local file to a remote host using only SSH
   [34m	[0mshellcheck disable=SC2029
 
+[35musage:[0m sshpipe_new <host>
+[34mexample:[0m my_pipe="$(sshpipe_new my_host | tail -n 1)"
+[34m	[0mcreate a named pipe to send bash commands to remote host
+
+[35musage:[0m sshpipe_close <host>
+[34mexample:[0m sshpipe_close my_host
+[34m	[0mclose a preexisting sshpipe
+
+[35musage:[0m sshpipe_tx <host> [content]
+[34mexample:[0m sshpipe_tx my_host hostname
+
+[35musage:[0m sshpipe_rx <host>
+[34mexample:[0m sshpipe_rx my_host | grep ' line ' | tee errors.txt
+
 [35musage:[0m resolvepath <path>
 [34m	[0mattempts to resolve all symlinks until the origin path is discovered
 [34m	[0mcircular symlinks will keep it looping forever

@@ -150,6 +150,65 @@ rxcp() {
   ssh "$1" "cat $2" > "$3"
 }
 
+sshpipe_new() { # manage multiple file descriptors
+  local fdi
+  local fdo
+  local remote
+  local in
+  local out
+  local pid
+  fdi=13
+  fdo=14
+  remote="$1"
+  in="$remote.$fdi.in"
+  out="$remote.$fdo.out"
+  pid="$remote.$fdi.pid"
+
+  mkfifo "$in" "$out"
+  ssh -tt "$remote" < "$in" > "$out" &
+  echo "$!" > "$pid"
+  eval "exec $fdi>$in"
+  eval "exec $fdo<$out"
+  echo "$remote.$fdi"
+}
+
+sshpipe_close() {
+  local fdi
+  local fdo
+  local remote
+  local in
+  local out
+  local pid
+  fdi=13
+  fdo=14
+  remote="$1"
+  in="$remote.$fdi.in"
+  out="$remote.$fdo.out"
+  pid="$remote.$fdi.pid"
+
+  eval "exec $fdi>&-"
+  eval "exec $fdo>&-"
+  kill "$(< "$pid")"
+  echo "$pid"
+  rm -v "$in" "$out" "$pid"
+}
+
+sshpipe_tx() { # TODO: make it read from stdin
+  local fd
+  fd=13
+
+  echo "$@" >&"$fd"
+}
+
+sshpipe_rx() {
+  local fdo
+  fdo=14
+
+  while read -r -t 0.1 -u "$fdo" LINE; do
+    echo "$LINE"
+  done
+}
+
 resolvepath() {
   p="$1"
   while [[ -h $p ]]; do
