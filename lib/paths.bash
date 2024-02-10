@@ -29,5 +29,5 @@ thisdir() {
 # creates a temporary directory as defined by the system
 # if no prefix supplied it will use the name of the running script
 tmpdir() {
-  mktemp -d "${1:-$(scriptname)}.XXXXXXXX"
+  mktemp -d "${1:-$(scriptname)}.XXXXXXXX" -t # without the -t it will create it in $PWD
 }
