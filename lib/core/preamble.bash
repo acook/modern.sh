@@ -15,9 +15,13 @@ if [[ -n $BASH_SOURCE ]]; then
   # get the full path to the script that was originally run
   # this is typically the one that later included modern.sh
   MODERN_MAIN_FULLPATH="$(readlink -e "$0")"
+
+  # lets modern.sh functions know that there is no file to load from
+  MODERN_SCRIPT_FILELESS="false"
 else # the script was run via something like `curl https://example.com/script.bash | bash -s`
   MODERN_SCRIPT_FULLPATH="$MODERN_SCRIPT_ORIG_PWD/modern.sh"
   MODERN_MAIN_FULLPATH="$MODERN_SCRIPT_ORIG_PWD/modern.sh"
+  MODERN_SCRIPT_FILELESS="true"
 fi
 
 set -o nounset
@@ -41,7 +45,7 @@ MODERN_CURRENT_FULLPATH=$MODERN_SCRIPT_FULLPATH
 
 if [[ -z ${_MODERN_LOADED_LIBS+unset} ]]; then
   declare -a _MODERN_LOADED_LIBS
-  _MODERN_LOADED_LIBS=("$(readlink -e "${BASH_SOURCE[0]}")")
+  _MODERN_LOADED_LIBS=("$MODERN_MAIN_FULLPATH)")
 else
   return 0
 fi
@@ -74,10 +78,17 @@ if [[ $MODERN_PROCESS_ARGS == "true" ]]; then
     MODERN_ARGS+=( "$1" )
     shift
   done
+else
+  MODERN_QUIET="false"
+  MODERN_ARGS=()
+  MODERN_ARGS_UNKNOWN=("$@")
 fi
 
 if [[ $MODERN_QUIET != "true" ]]; then
-  echo " -- ($(basename "$(dirname "$(readlink -m "${BASH_SOURCE[-1]}")")")/$(basename "${BASH_SOURCE[-1]}") @ $(date "+%Y-%m-%d %T")) : setting up..." >&2
+  echo -ne " -- ("
+  basename -z "$(dirname "$MODERN_MAIN_DIR")" | tr -d '\0'
+  echo -ne "/$MODERN_MAIN_NAME"
+  echo -ne ") @ $(date "+%Y-%m-%d %T")) : setting up..."
 fi
 
 export MODERN_SCRIPT_ORIG_PWD
@@ -91,5 +102,7 @@ export MODERN_MAIN_FULLPATH
 export MODERN_MAIN_NAME
 export MODERN_MAIN_DIR
 export MODERN_MAIN_EXE
+
+export MODERN_SCRIPT_FILELESS
 
 export MODERN_CURRENT_FULLPATH
