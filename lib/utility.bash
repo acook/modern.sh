@@ -4,8 +4,15 @@
 
 # usage: <input> | nl_squeeze
 # example: cat foo.txt | nl_squeeze
-# removes duplicate spaces
+# squeezes newlines so that there are no more than 2 together
 nl_squeeze() { awk 'BEGIN{RS="";ORS="\n\n"}1' ;}
+
+# usage: <input> | no_emptylines
+# example: cat foo.txt | no_emptylines
+# removes empty lines and lines containing only spaces
+no_emptylines() {
+  sed '/^\s*$/d'
+}
 
 # usage: <input> | sh_comments [grep_args]
 # example: cat foo.bash | sh_comments
@@ -18,7 +25,7 @@ sh_comments() { \grep ${1:-} '^\s*#'; }
 no_comments() { sh_comments -v; }
 
 # usage: <input> | stripscript
-# removes comments and condenses newlines
+# removes comments and empty lines
 stripscript() {
-  no_comments | nl_squeeze
+  no_comments | no_emptylines
 }
