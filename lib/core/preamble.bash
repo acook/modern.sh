@@ -89,6 +89,7 @@ if [[ $MODERN_QUIET != "true" ]]; then
   basename -z "$(dirname "$MODERN_MAIN_DIR")" | tr -d '\0'
   echo -ne "/$MODERN_MAIN_NAME"
   echo -ne ") @ $(date "+%Y-%m-%d %T")) : setting up..."
+  echo
 fi
 
 export MODERN_SCRIPT_ORIG_PWD
