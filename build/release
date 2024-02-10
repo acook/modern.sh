@@ -18,7 +18,7 @@ compile() {
 
 setup
 
-compile | stripscript > "$outfile"
+compile | no_comments | nl_squeeze > "$outfile"
 say "Adding Shebang..."
 awk 'BEGIN{print "#!/usr/bin/env bash"} {print}' "$outfile" > tmpfile && mv tmpfile "$outfile"
 run "Set Executable" chmod +x "$outfile"
