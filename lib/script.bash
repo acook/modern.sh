@@ -101,8 +101,16 @@ bash_trace() {
 # - `scriptname`: it may become difficult to trace errors as reported messages will incorrectly identify the script they originated from
 # - `scriptsame`: files which can be used as both a library and an executable will no longer be able to determine what they should be doing
 _set_current_script() {
-  local fallback=${BASH_SOURCE[2]:-BASH_SOURCE[0]}
-  local script=${1:-$fallback}
-
-  MODERN_CURRENT_FULLPATH=$(readlink -m "$script");
+  set +o nounset
+  if [[ -n $1 ]]; then
+    set -o nounset
+    MODERN_CURRENT_FULLPATH="$(readlink -m "$1")"
+  else
+    set -o nounset
+    if [[ $MODERN_SCRIPT_FILELESS == "true" ]]; then
+      MODERN_CURRENT_FULLPATH="$MODERN_MAIN_FULLPATH"
+    else
+      MODERN_CURRENT_FULLPATH="${BASH_SOURCE[2]:-BASH_SOURCE[0]}"
+    fi
+  fi
 }
