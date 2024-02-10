@@ -197,7 +197,8 @@ rxcp() {
   ssh "$1" "cat $2" > "$3"
 }
 
-sshpipe_new() { # manage multiple file descriptors
+sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes array
+  export MODERN_SSH_PIPE_DIR
   local fdi
   local fdo
   local remote
@@ -210,12 +211,16 @@ sshpipe_new() { # manage multiple file descriptors
   in="$remote.$fdi.in"
   out="$remote.$fdo.out"
   pid="$remote.$fdi.pid"
+  MODERN_SSH_PIPE_DIR="$(tmpdir sshpipe)"
 
+  pushd "$MODERN_SSH_PIPE_DIR" || die "failed to pushd to temporary directory: $MODERN_SSH_PIPE_DIR"
   mkfifo "$in" "$out"
   ssh -tt "$remote" < "$in" > "$out" &
   echo "$!" > "$pid"
   eval "exec $fdi>$in"
   eval "exec $fdo<$out"
+  popd || die "failed to popd from temporary directory"
+
   echo "$remote.$fdi"
 }
 
@@ -233,11 +238,13 @@ sshpipe_close() {
   out="$remote.$fdo.out"
   pid="$remote.$fdi.pid"
 
+  pushd "$MODERN_SSH_PIPE_DIR" || die "failed to pushd to temporary directory: $MODERN_SSH_PIPE_DIR"
   eval "exec $fdi>&-"
   eval "exec $fdo>&-"
   kill "$(< "$pid")"
   echo "$pid"
   rm -v "$in" "$out" "$pid"
+  popd || die "failed to popd from temporary directory"
 }
 
 sshpipe_tx() { # TODO: make it read from stdin
@@ -268,6 +275,10 @@ resolvepath() {
 
 thisdir() {
   dirname -- "$(scriptcaller)"
+}
+
+tmpdir() {
+  mktemp -d "${1:-$(scriptname)}.XXXXXXXX" -t # without the -t it will create it in $PWD
 }
 
 displayname() {
@@ -357,7 +368,7 @@ elapsed() {
   started_at=$1
   ended_at=$2
 
-  if [[ -x $(which bc) ]]; then
+  if command_exists bc; then
     dt=$(echo "$ended_at - $started_at" | bc)
     dd=$(echo "$dt/86400" | bc)
     dt2=$(echo "$dt-86400*$dd" | bc)
@@ -366,11 +377,25 @@ elapsed() {
     dm=$(echo "$dt3/60" | bc)
     ds=$(echo "$dt3-60*$dm" | bc)
 
-    printf " -- time elapsed: %d:%02d:%02d:%02.4f\n" "$dd" "$dh" "$dm" "$ds"
+    printf "time elapsed: %d:%02d:%02d:%02.4f\n" "$dd" "$dh" "$dm" "$ds"
   else
     warn "START: $started_at"
     warn "END: $ended_at"
   fi
+}
+
+nl_squeeze() { awk 'BEGIN{RS="";ORS="\n\n"}1' ;}
+
+no_emptylines() {
+  sed '/^\s*$/d'
+}
+
+sh_comments() { \grep ${1:-} '^\s*#'; }
+
+no_comments() { sh_comments -v; }
+
+stripscript() {
+  no_comments | no_emptylines
 }
 
 safe_cd() {
@@ -432,4 +457,15 @@ if [[ Darwin = $(uname) ]]; then
 fi
 
 _set_current_script
+
+set +o nounset
+if [[ -z $TMPDIR ]]; then
+  TMPDIR="/tmp"
+fi
+set -o nounset
+
+if ! [[ -w $TMPDIR ]]; then
+  warn "TMPDIR '$TMPDIR' not writable! using '.' instead"
+  TMPDIR='.'
+fi
 

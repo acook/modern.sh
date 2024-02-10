@@ -92,6 +92,11 @@
 [34m	[0mcircular symlinks will keep it looping forever
 [34m	[0msee also: `man realpath(1)` on some systems
 
+[35musage:[0m tmpdir: [prefix]
+[34mexample:[0m my_temp_folder="$(tmpdir)"
+[34m	[0mcreates a temporary directory as defined by the system
+[34m	[0mif no prefix supplied it will use the name of the running script
+
 [35musage:[0m displayname <path>
 [34mexample:[0m displayname "$(pwd)"
 [34m	[0mtakes a path and generates "last_folder/filename" string
@@ -149,6 +154,25 @@
 [35musage:[0m elapsed <start_time> <end_time>
 [34m	[0mtakes two unix timestamps with nanoseconds
 [34m	[0mreturns the difference in human-readable format
+
+[35musage:[0m <input> | nl_squeeze
+[34mexample:[0m cat foo.txt | nl_squeeze
+[34m	[0msqueezes newlines so that there are no more than 2 together
+
+[35musage:[0m <input> | no_emptylines
+[34mexample:[0m cat foo.txt | no_emptylines
+[34m	[0mremoves empty lines and lines containing only spaces
+
+[35musage:[0m <input> | sh_comments [grep_args]
+[34mexample:[0m cat foo.bash | sh_comments
+[34m	[0mextracts only lines starting with an octothorpe
+
+[35musage:[0m <input> | no_comments
+[34mexample:[0m cat foo.bash | no_comments
+[34m	[0mremoves comments from scripts
+
+[35musage:[0m <input> | stripscript
+[34m	[0mremoves comments and empty lines
 
 [35musage:[0m safe_cd <path>
 [34mexample:[0m safe_cd /mnt/network_drive
