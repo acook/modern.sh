@@ -64,7 +64,6 @@ sshpipe_close() {
   in="$remote.$fdi.in"
   out="$remote.$fdo.out"
   pid="$remote.$fdi.pid"
-  MODERN_SSH_PIPE_DIR="$(tmpdir sshpipe)"
 
   pushd "$MODERN_SSH_PIPE_DIR" || die "failed to pushd to temporary directory: $MODERN_SSH_PIPE_DIR"
   eval "exec $fdi>&-"
