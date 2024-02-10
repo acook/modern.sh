@@ -21,7 +21,8 @@ rxcp() {
 # usage: sshpipe_new <host>
 # example: my_pipe="$(sshpipe_new my_host | tail -n 1)"
 # create a named pipe to send bash commands to remote host
-sshpipe_new() { # manage multiple file descriptors
+sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes array
+  export MODERN_SSH_PIPE_DIR
   local fdi
   local fdo
   local remote
@@ -34,12 +35,16 @@ sshpipe_new() { # manage multiple file descriptors
   in="$remote.$fdi.in"
   out="$remote.$fdo.out"
   pid="$remote.$fdi.pid"
+  MODERN_SSH_PIPE_DIR="$(tmpdir sshpipe)"
 
+  pushd "$MODERN_SSH_PIPE_DIR" || die "failed to pushd to temporary directory: $MODERN_SSH_PIPE_DIR"
   mkfifo "$in" "$out"
   ssh -tt "$remote" < "$in" > "$out" &
   echo "$!" > "$pid"
   eval "exec $fdi>$in"
   eval "exec $fdo<$out"
+  popd || die "failed to popd from temporary directory"
+
   echo "$remote.$fdi"
 }
 
@@ -59,12 +64,15 @@ sshpipe_close() {
   in="$remote.$fdi.in"
   out="$remote.$fdo.out"
   pid="$remote.$fdi.pid"
+  MODERN_SSH_PIPE_DIR="$(tmpdir sshpipe)"
 
+  pushd "$MODERN_SSH_PIPE_DIR" || die "failed to pushd to temporary directory: $MODERN_SSH_PIPE_DIR"
   eval "exec $fdi>&-"
   eval "exec $fdo>&-"
   kill "$(< "$pid")"
   echo "$pid"
   rm -v "$in" "$out" "$pid"
+  popd || die "failed to popd from temporary directory"
 }
 
 # usage: sshpipe_tx <host> [content]
