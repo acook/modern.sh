@@ -23,5 +23,11 @@ resolvepath() {
 thisdir() {
   dirname -- "$(scriptcaller)"
 }
-# `readlink -f` may not work on BSD systems while `stat -f` or `realpath` would
-# `$0` doesn't work if the file is sourced
+
+# usage: tmpdir: [prefix]
+# example: my_temp_folder="$(tmpdir)"
+# creates a temporary directory as defined by the system
+# if no prefix supplied it will use the name of the running script
+tmpdir() {
+  mktemp -d "${1:-$(scriptname)}.XXXXXXXX"
+}
