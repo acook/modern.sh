@@ -37,15 +37,17 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
   pid="$remote.$fdi.pid"
   MODERN_SSH_PIPE_DIR="$(tmpdir sshpipe)"
 
-  pushd "$MODERN_SSH_PIPE_DIR" || die "failed to pushd to temporary directory: $MODERN_SSH_PIPE_DIR"
+  pushd "$MODERN_SSH_PIPE_DIR" || die "sshpipe: failed to pushd to temporary directory: $MODERN_SSH_PIPE_DIR"
   mkfifo "$in" "$out"
   ssh -tt "$remote" < "$in" > "$out" &
   echo "$!" > "$pid"
   eval "exec $fdi>$in"
   eval "exec $fdo<$out"
-  popd || die "failed to popd from temporary directory"
+  popd || die "sshpipe: failed to popd from temporary directory"
 
-  echo "$remote.$fdi"
+
+
+  echo "$MODERN_SSH_PIPE_DIR $fdi"
 }
 
 # usage: sshpipe_close <host>
@@ -65,13 +67,13 @@ sshpipe_close() {
   out="$remote.$fdo.out"
   pid="$remote.$fdi.pid"
 
-  pushd "$MODERN_SSH_PIPE_DIR" || die "failed to pushd to temporary directory: $MODERN_SSH_PIPE_DIR"
+  pushd "$MODERN_SSH_PIPE_DIR" || die "sshpipe: failed to pushd to temporary directory: $MODERN_SSH_PIPE_DIR"
   eval "exec $fdi>&-"
   eval "exec $fdo>&-"
   kill "$(< "$pid")"
   echo "$pid"
   rm -v "$in" "$out" "$pid"
-  popd || die "failed to popd from temporary directory"
+  popd || die "sshpipe: failed to popd from temporary directory"
 }
 
 # usage: sshpipe_tx <host> [content]
