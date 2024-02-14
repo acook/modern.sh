@@ -45,8 +45,6 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
   eval "exec $fdo<$out"
   popd || die "sshpipe: failed to popd from temporary directory"
 
-
-
   echo "$MODERN_SSH_PIPE_DIR $fdi"
 }
 
@@ -79,10 +77,10 @@ sshpipe_close() {
 # usage: sshpipe_tx <host> [content]
 # example: sshpipe_tx my_host hostname
 sshpipe_tx() { # TODO: make it read from stdin
-  local fd
-  fd=13
+  local fdi
+  fdi=13
 
-  echo "$@" >&"$fd"
+  echo "$@" >&"$fdi"
 }
 
 # usage: sshpipe_rx <host>
