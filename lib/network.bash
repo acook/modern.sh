@@ -79,8 +79,9 @@ sshpipe_close() {
 sshpipe_tx() { # TODO: make it read from stdin
   local fdi
   fdi=13
+  shift
 
-  echo "$@" >&"$fdi"
+  echo -e "$@" >&"$fdi"
 }
 
 # usage: sshpipe_rx <host>
@@ -88,6 +89,7 @@ sshpipe_tx() { # TODO: make it read from stdin
 sshpipe_rx() {
   local fdo
   fdo=14
+  shift
 
   while read -r -t 0.1 -u "$fdo" LINE; do
     echo "$LINE"
