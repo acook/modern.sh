@@ -39,7 +39,7 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
 
   pushd "$MODERN_SSH_PIPE_DIR" || die "sshpipe: failed to pushd to temporary directory: $MODERN_SSH_PIPE_DIR"
   mkfifo "$in" "$out"
-  ssh -tt "$remote" < "$in" > "$out" &
+  ssh -o BatchMode=yes -tt "$remote" < "$in" > "$out" &
   echo "$!" > "$pid"
   eval "exec $fdi>$in"
   eval "exec $fdo<$out"
