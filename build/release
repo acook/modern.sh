@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+THIS="$(basename "$0")"
+DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
+
 cd "$(dirname "${BASH_SOURCE[0]}")/../lib" || exit 1
 source ../modern.sh
 
@@ -15,10 +18,17 @@ compile() {
   core/compatibility.bash , \
   core/finalize.bash;
 }
+export_functions() {
+  if command_exists ruby; then
+    cat /dev/stdin | "$DIR/export_functions.rb"
+  else
+    cat /dev/stdin
+  fi
+}
 
 setup
 
-compile | no_comments | nl_squeeze > "$outfile"
+compile | no_comments | nl_squeeze | export_functions > "$outfile"
 say "Adding Shebang..."
 awk 'BEGIN{print "#!/usr/bin/env bash"} {print}' "$outfile" > tmpfile && mv tmpfile "$outfile"
 run "Set Executable" chmod +x "$outfile"
