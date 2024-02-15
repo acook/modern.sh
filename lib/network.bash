@@ -48,20 +48,47 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
   echo "$MODERN_SSH_PIPE_DIR $fdi"
 }
 
-# usage: sshpipe_status <host>
+# usage: sshpipe_status <host> [-q]
 # example: remote_shell="$(sshpipe_status my_host | cut -d '|' -f 1)"
-# return the shell, user, and pwd of the remote in the format:
+# it returns non-zero for any errors for the detected sshpipe and reports them on stderr
+# if -p is passed in, it will print the remote shell, user, and pwd in the format:
 # shell|user|pwd
 sshpipe_status() {
   local fdi
   local fdo
+  local info
   local remote
   local result
   fdi=13
   fdo=14
-  remote="$1"
 
-  sshpipe_rx "$remote"
+  if [[ ${1:-unset} == "-p" ]]; then
+    info="true"
+    remote="$2"
+  elif [[ ${2:-unset} == "-p" ]]; then
+    info="true"
+    remote="$1"
+  else
+    info="false"
+    remote="$1"
+  fi
+
+  if ! [[ -d $MODERN_SSH_PIPE_DIR ]]; then
+    warn "sshpipe: no MODERN_SSH_PIPE_DIR - try connecting with sshpipe_new <host> first?"
+    return 1
+  fi
+
+  if ! fd_check "$fdi" || ! fd_check "$fdo"; then
+    warn "sshpipe: unable to detect the file descriptors used by sshpipe - check ssh credentials?"
+    return 2
+  fi
+
+  if [[ $info == "true" ]]; then
+    # redirect to stderr so it is easy to separate from the actual info
+    sshpipe_rx "$remote" >&2
+  else
+    sshpipe_rx "$remote" > /dev/null
+  fi
 
   echo 'printf "\133 $SHELL \174 $USER \174 $PWD \135\n"' >&"$fdi"
 
@@ -69,9 +96,13 @@ sshpipe_status() {
 
   regex='\[\s(.*sh)\s\|\s(.*)\s\|\s(.*)\s\]'
   if [[ $result =~ $regex ]]; then
-    echo -e "${BASH_REMATCH[1]}|${BASH_REMATCH[2]}|${BASH_REMATCH[3]}"
+    if [[ $info == "true" ]]; then
+      echo -e "${BASH_REMATCH[1]}|${BASH_REMATCH[2]}|${BASH_REMATCH[3]}"
+    fi
+    return 0
   else
-    echo "unable to get status - remote not connected or not a shell?"
+    warn "sshpipe: unable to get info - disconnected or not a shell on remote?"
+    return 3
   fi
 }
 
