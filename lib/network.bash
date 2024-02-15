@@ -56,24 +56,24 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
 sshpipe_status() {
   local fdi
   local fdo
-  local info
+  local print
   local remote
   local result
   fdi=13
   fdo=14
 
-  if [[ ${1:-unset} == "-p" ]]; then
-    info="true"
+  if [[ $1 == "-p" ]]; then
+    print="true"
     remote="$2"
   elif [[ ${2:-unset} == "-p" ]]; then
-    info="true"
+    print="true"
     remote="$1"
   else
-    info="false"
+    print="false"
     remote="$1"
   fi
 
-  if ! [[ -d $MODERN_SSH_PIPE_DIR ]]; then
+  if [[ ! -d $MODERN_SSH_PIPE_DIR ]]; then
     warn "sshpipe: no MODERN_SSH_PIPE_DIR - try connecting with sshpipe_new <host> first?"
     return 1
   fi
@@ -83,20 +83,21 @@ sshpipe_status() {
     return 2
   fi
 
-  if [[ $info == "true" ]]; then
+  if [[ $print == "true" ]]; then
     # redirect to stderr so it is easy to separate from the actual info
     sshpipe_rx "$remote" >&2
   else
     sshpipe_rx "$remote" > /dev/null
   fi
 
+  # shellcheck disable=SC2028,SC2016
   echo 'printf "\133 $SHELL \174 $USER \174 $PWD \135\n"' >&"$fdi"
 
   result="$(sshpipe_rx "$remote")"
 
   regex='\[\s(.*sh)\s\|\s(.*)\s\|\s(.*)\s\]'
   if [[ $result =~ $regex ]]; then
-    if [[ $info == "true" ]]; then
+    if [[ $print == "true" ]]; then
       echo -e "${BASH_REMATCH[1]}|${BASH_REMATCH[2]}|${BASH_REMATCH[3]}"
     fi
     return 0
