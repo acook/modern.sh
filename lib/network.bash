@@ -29,26 +29,56 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
   local in
   local out
   local pid
+  local status
+  local connected
+  local delay
+  local checks
+  local max_checks
   fdi=13
   fdo=14
   remote="$1"
   in="$remote.$fdi.in"
   out="$remote.$fdo.out"
   pid="$remote.$fdi.pid"
+  status="$remote.$fdi.status"
   MODERN_SSH_PIPE_DIR="$(tmpdir sshpipe)"
 
   pushd "$MODERN_SSH_PIPE_DIR" || die "sshpipe: failed to pushd to temporary directory: $MODERN_SSH_PIPE_DIR"
   mkfifo "$in" "$out"
-  ssh -o BatchMode=yes -tt "$remote" < "$in" > "$out" &
-  echo "$!" > "$pid"
+  ( ssh -o BatchMode=yes -tt "$remote" < "$in" > "$out" ; echo -n "$?" > "$status" ) &
+  SSHPIPEPID="$!"
+  echo "$SSHPIPEPID" > "$pid"
   eval "exec $fdi>$in"
   eval "exec $fdo<$out"
   popd || die "sshpipe: failed to popd from temporary directory"
 
+  delay="0.25s"
+  checks=0
+  max_checks=25 # 5 seconds with a delay of 0.25s
+  connected=false
+  while [[ $connected = "false" && checks -lt $max_checks ]] && pid_check "$SSHPIPEPID"; do
+    sleep "$delay"
+    if sshpipe_status kigal > /dev/null; then
+      connected=true
+    fi
+  done
+
+  if ! pid_check "$SSHPIPEPID"; then
+    wait "$SSHPIPEPID"
+    warn "sshpipe: process exited with status code $?"
+    return 3
+  fi
+
+  if [[ $connected ==  "true" ]]; then
+    say "sshpipe: connected to $remote!"
+  else
+    warn "sshpipe: unable to determine if the connection is working"
+  fi
+
   echo "$MODERN_SSH_PIPE_DIR $fdi"
 }
 
-# usage: sshpipe_status <host> [-q]
+# usage: sshpipe_status <host> [-p]
 # example: remote_shell="$(sshpipe_status my_host | cut -d '|' -f 1)"
 # it returns non-zero for any errors for the detected sshpipe and reports them on stderr
 # if -p is passed in, it will print the remote shell, user, and pwd in the format:
