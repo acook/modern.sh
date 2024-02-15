@@ -48,6 +48,33 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
   echo "$MODERN_SSH_PIPE_DIR $fdi"
 }
 
+# usage: sshpipe_status <host>
+# example: remote_shell="$(sshpipe_status my_host | cut -d '|' -f 1)"
+# return the shell, user, and pwd of the remote in the format:
+# shell|user|pwd
+sshpipe_status() {
+  local fdi
+  local fdo
+  local remote
+  local result
+  fdi=13
+  fdo=14
+  remote="$1"
+
+  sshpipe_rx "$remote"
+
+  echo 'printf "\133 $SHELL \174 $USER \174 $PWD \135\n"' >&"$fdi"
+
+  result="$(sshpipe_rx "$remote")"
+
+  regex='\[\s(.*sh)\s\|\s(.*)\s\|\s(.*)\s\]'
+  if [[ $result =~ $regex ]]; then
+    echo -e "${BASH_REMATCH[1]}|${BASH_REMATCH[2]}|{BASH_REMATCH[3]}"
+  else
+    echo "unable to get status - remote not connected or not a shell?"
+  fi
+}
+
 # usage: sshpipe_close <host>
 # example: sshpipe_close my_host
 # close a preexisting sshpipe
