@@ -31,3 +31,13 @@ thisdir() {
 tmpdir() {
   mktemp -d "${1:-$(scriptname)}.XXXXXXXX" -t # without the -t it will create it in $PWD
 }
+
+# usage: fd_check <fd>
+# example: if fd_check 14; then echo "the fd is open"; fi
+# checks if a file descriptor is open
+# doesn't work for fd 2 because it needs to capture possible error messages
+fd_check() {
+  local fd
+  fd="$1"
+  { true >&"$fd"; } 2>&-
+}
