@@ -69,7 +69,7 @@ sshpipe_status() {
 
   regex='\[\s(.*sh)\s\|\s(.*)\s\|\s(.*)\s\]'
   if [[ $result =~ $regex ]]; then
-    echo -e "${BASH_REMATCH[1]}|${BASH_REMATCH[2]}|{BASH_REMATCH[3]}"
+    echo -e "${BASH_REMATCH[1]}|${BASH_REMATCH[2]}|${BASH_REMATCH[3]}"
   else
     echo "unable to get status - remote not connected or not a shell?"
   fi
