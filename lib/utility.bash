@@ -29,3 +29,14 @@ no_comments() { sh_comments -v; }
 stripscript() {
   no_comments | no_emptylines
 }
+
+# usage: strand [length] [charset]
+# example: my_token="$(strand 16 'A-Za-z0-9!"#$%&\'()*+,-./:;<=>?@[\]^_`{|}~')"
+# generates a random string
+strand() {
+  local len
+  local charset
+  len="${1:-8}"
+  charset="${2:-A-Z0-9}"
+  LC_ALL=C tr -dc "$charset" < /dev/urandom | head -c "$len"
+}
