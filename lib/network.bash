@@ -56,6 +56,7 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
 sshpipe_status() {
   local fdi
   local fdo
+  local pid
   local print
   local remote
   local result
@@ -76,11 +77,18 @@ sshpipe_status() {
   if [[ ! -d $MODERN_SSH_PIPE_DIR ]]; then
     warn "sshpipe: no MODERN_SSH_PIPE_DIR - try connecting with sshpipe_new <host> first?"
     return 1
+  else
+    pid="$(<"$MODERN_SSH_PIPE_DIR/$remote.$fdi.pid")"
   fi
 
   if ! fd_check "$fdi" || ! fd_check "$fdo"; then
     warn "sshpipe: unable to detect the file descriptors used by sshpipe - check ssh credentials?"
     return 2
+  fi
+
+  if ! exitstatus="$(pid_check "$pid" -p)"; then
+    warn "sshpipe: process exited with status code $exitstatus"
+    return 3
   fi
 
   if [[ $print == "true" ]]; then
@@ -103,7 +111,7 @@ sshpipe_status() {
     return 0
   else
     warn "sshpipe: unable to get info - disconnected or not a shell on remote?"
-    return 3
+    return 4
   fi
 }
 

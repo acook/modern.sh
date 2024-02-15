@@ -41,3 +41,37 @@ fd_check() {
   fd="$1"
   { true >&"$fd"; } 2>&-
 }
+
+# usage: pid_check <pid> [-p]
+# example: if pid_check 29846; then echo "process is up"; fi
+# non-blocking process status check
+# returns 0 if process is live
+# returns 255 and if -p it prints the processes exit status if dead
+pid_check() {
+  local pid
+  local print
+  local exitstatus
+
+  if [[ $1 == "-p" ]]; then
+    print="true"
+    pid="$2"
+  elif [[ ${2:-unset} == "-p" ]]; then
+    print="true"
+    pid="$1"
+  else
+    print="false"
+    pid="$1"
+  fi
+
+  if [[ ! -d /proc/$pid ]]; then
+    # only use `wait`` if it has already exited
+    # `wait` will fetch the exit code of an arbitrary pid even after it is already closed
+    wait "$pid"
+    exitstatus="$?"
+    if [[ $print == "true" ]]; then
+      echo "$exitstatus"
+    fi
+    return 255
+  fi
+  return 0
+}
