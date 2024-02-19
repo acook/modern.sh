@@ -18,14 +18,16 @@ rxcp() {
   ssh "$1" "cat $2" > "$3"
 }
 
-# usage: sshpipe_new <host>
+# usage: sshpipe_new <host> <command>
 # example: my_pipe="$(sshpipe_new my_host | tail -n 1)"
 # create a named pipe to send bash commands to remote host
+# <command> is the starting command to run instead of the default shell
 sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes array
   export MODERN_SSH_PIPE_DIR
   local fdi
   local fdo
   local remote
+  local command
   local in
   local out
   local pid
@@ -37,6 +39,12 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
   fdi=13
   fdo=14
   remote="$1"
+  shift
+  if [[ -n ${1:-unset} ]]; then
+    command=("$@")
+  else
+    command=()
+  fi
   in="$remote.$fdi.in"
   out="$remote.$fdo.out"
   pid="$remote.$fdi.pid"
@@ -45,7 +53,7 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
 
   pushd "$MODERN_SSH_PIPE_DIR" || die "sshpipe: failed to pushd to temporary directory: $MODERN_SSH_PIPE_DIR"
   mkfifo "$in" "$out"
-  ( ssh -o BatchMode=yes -tt "$remote" < "$in" > "$out" ; echo -n "$?" > "$status" ) &
+  ( ssh -o BatchMode=yes -tt "$remote" "${command[@]}" < "$in" > "$out" ; echo -n "$?" > "$status" ) &
   SSHPIPEPID="$!"
   echo "$SSHPIPEPID" > "$pid"
   eval "exec $fdi>$in"
