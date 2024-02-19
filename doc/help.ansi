@@ -73,9 +73,16 @@
 [34m	[0msend a local file to a remote host using only SSH
   [34m	[0mshellcheck disable=SC2029
 
-[35musage:[0m sshpipe_new <host>
+[35musage:[0m sshpipe_new <host> <command>
 [34mexample:[0m my_pipe="$(sshpipe_new my_host | tail -n 1)"
 [34m	[0mcreate a named pipe to send bash commands to remote host
+[34m	[0m<command> is the starting command to run instead of the default shell
+
+[35musage:[0m sshpipe_status <host> [-p]
+[34mexample:[0m remote_shell="$(sshpipe_status my_host | cut -d '|' -f 1)"
+[34m	[0mit returns non-zero for any errors for the detected sshpipe and reports them on stderr
+[34m	[0mif -p is passed in, it will print the remote shell, user, and pwd in the format:
+[34m	[0mshell|user|pwd
 
 [35musage:[0m sshpipe_close <host>
 [34mexample:[0m sshpipe_close my_host
@@ -96,6 +103,17 @@
 [34mexample:[0m my_temp_folder="$(tmpdir)"
 [34m	[0mcreates a temporary directory as defined by the system
 [34m	[0mif no prefix supplied it will use the name of the running script
+
+[35musage:[0m fd_check <fd>
+[34mexample:[0m if fd_check 14; then echo "the fd is open"; fi
+[34m	[0mchecks if a file descriptor is open
+[34m	[0mdoesn't work for fd 2 because it needs to capture possible error messages
+
+[35musage:[0m pid_check <pid> [-p]
+[34mexample:[0m if pid_check 29846; then echo "process is up"; fi
+[34m	[0mnon-blocking process status check
+[34m	[0mreturns 0 if process is live
+[34m	[0mreturns 255 and if -p it prints the processes exit status if dead
 
 [35musage:[0m displayname <path>
 [34mexample:[0m displayname "$(pwd)"
@@ -173,6 +191,10 @@
 
 [35musage:[0m <input> | stripscript
 [34m	[0mremoves comments and empty lines
+
+[35musage:[0m strand [length] [charset]
+[34mexample:[0m my_token="$(strand 16 'A-Za-z0-9!"[34m	[0m$%&\'()*+,-./:;<=>?@[\]^_`{|}~')"
+[34m	[0mgenerates a random string
 
 [35musage:[0m safe_cd <path>
 [34mexample:[0m safe_cd /mnt/network_drive

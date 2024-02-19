@@ -100,10 +100,13 @@ say()  {
     echo -ne " -- ($(scriptname) @ $(ts)) : $*\n";
   fi
 }
+export -f say
 
 warn() { say "$*" >&2; }
+export -f warn
 
 sayenv() { say "$1=$(eval "echo -ne \$$1")"; }
+export -f sayenv
 
 colorfg() {
   case "$1" in
@@ -124,6 +127,7 @@ colorfg() {
   esac
   echo -ne "\e[$color""m"
 }
+export -f colorfg
 
 colorbg() {
   case "$1" in
@@ -144,33 +148,42 @@ colorbg() {
   esac
   echo -ne "\e[$color""m"
 }
+export -f colorbg
 
 colorreset() {
   echo -ne "\e[0m"
 }
+export -f colorreset
 
 ansigoto() {
   echo -ne "\e[$1""G"
 }
+export -f ansigoto
 
 ansieol() {
   echo -ne "\e[K"
 }
+export -f ansieol
 
 ansiup() {
   echo -ne "\e[$1""A"
 }
+export -f ansiup
 
 hilite() {
     REGEX_SED=$(echo $1 | sed "s/[|()]/\\\&/g");
     sed "s/$REGEX_SED/$2&$(colorreset)/g"
 }
+export -f hilite
 
 ok()   { say "\e[32m(ok) $*\e[0m"; exit 0; }
+export -f ok
 
 die()  { warn "\e[31m(die) $*\e[0m"; exit 1; }
+export -f die
 
 die_status() { warn "\e[31m(died with status code $1) ${*:2}\e[0m"; exit "$1"; }
+export -f die_status
 
 quit_status() {
   if scriptsame; then
@@ -188,41 +201,143 @@ quit_status() {
     return "$1"
   fi
 }
+export -f quit_status
 
 txcp() {
     ssh "$1" "cat > '$3'" < "$2"
 }
+export -f txcp
 
 rxcp() {
   ssh "$1" "cat $2" > "$3"
 }
+export -f rxcp
 
 sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes array
   export MODERN_SSH_PIPE_DIR
   local fdi
   local fdo
   local remote
+  local command
   local in
   local out
   local pid
+  local status
+  local connected
+  local delay
+  local checks
+  local max_checks
   fdi=13
   fdo=14
   remote="$1"
+  shift
+  if [[ -n ${1:-unset} ]]; then
+    command=("$@")
+  else
+    command=()
+  fi
   in="$remote.$fdi.in"
   out="$remote.$fdo.out"
   pid="$remote.$fdi.pid"
+  status="$remote.$fdi.status"
   MODERN_SSH_PIPE_DIR="$(tmpdir sshpipe)"
 
-  pushd "$MODERN_SSH_PIPE_DIR" || die "failed to pushd to temporary directory: $MODERN_SSH_PIPE_DIR"
+  pushd "$MODERN_SSH_PIPE_DIR" || die "sshpipe: failed to pushd to temporary directory: $MODERN_SSH_PIPE_DIR"
   mkfifo "$in" "$out"
-  ssh -tt "$remote" < "$in" > "$out" &
-  echo "$!" > "$pid"
+  ( ssh -o BatchMode=yes -tt "$remote" "${command[@]}" < "$in" > "$out" ; echo -n "$?" > "$status" ) &
+  SSHPIPEPID="$!"
+  echo "$SSHPIPEPID" > "$pid"
   eval "exec $fdi>$in"
   eval "exec $fdo<$out"
-  popd || die "failed to popd from temporary directory"
+  popd || die "sshpipe: failed to popd from temporary directory"
 
-  echo "$remote.$fdi"
+  delay="0.25s"
+  checks=0
+  max_checks=25 # 5 seconds with a delay of 0.25s
+  connected=false
+  while [[ $connected = "false" && checks -lt $max_checks ]] && pid_check "$SSHPIPEPID"; do
+    sleep "$delay"
+    if sshpipe_status kigal > /dev/null; then
+      connected=true
+    fi
+  done
+
+  if ! pid_check "$SSHPIPEPID"; then
+    wait "$SSHPIPEPID"
+    warn "sshpipe: process exited with status code $?"
+    return 3
+  fi
+
+  if [[ $connected ==  "true" ]]; then
+    say "sshpipe: connected to $remote!"
+  else
+    warn "sshpipe: unable to determine if the connection is working"
+  fi
+
+  echo "$MODERN_SSH_PIPE_DIR $fdi"
 }
+export -f sshpipe_new
+
+sshpipe_status() {
+  local fdi
+  local fdo
+  local pid
+  local print
+  local remote
+  local result
+  fdi=13
+  fdo=14
+
+  if [[ $1 == "-p" ]]; then
+    print="true"
+    remote="$2"
+  elif [[ ${2:-unset} == "-p" ]]; then
+    print="true"
+    remote="$1"
+  else
+    print="false"
+    remote="$1"
+  fi
+
+  if [[ ! -d $MODERN_SSH_PIPE_DIR ]]; then
+    warn "sshpipe: no MODERN_SSH_PIPE_DIR - try connecting with sshpipe_new <host> first?"
+    return 1
+  else
+    pid="$(<"$MODERN_SSH_PIPE_DIR/$remote.$fdi.pid")"
+  fi
+
+  if ! fd_check "$fdi" || ! fd_check "$fdo"; then
+    warn "sshpipe: unable to detect the file descriptors used by sshpipe - check ssh credentials?"
+    return 2
+  fi
+
+  if ! exitstatus="$(pid_check "$pid" -p)"; then
+    warn "sshpipe: process exited with status code $exitstatus"
+    return 3
+  fi
+
+  if [[ $print == "true" ]]; then
+    sshpipe_rx "$remote" >&2
+  else
+    sshpipe_rx "$remote" > /dev/null
+  fi
+
+  echo 'printf "\133 $SHELL \174 $USER \174 $PWD \135\n"' >&"$fdi"
+
+  result="$(sshpipe_rx "$remote")"
+
+  regex='\[\s(.*sh)\s\|\s(.*)\s\|\s(.*)\s\]'
+  if [[ $result =~ $regex ]]; then
+    if [[ $print == "true" ]]; then
+      echo -e "${BASH_REMATCH[1]}|${BASH_REMATCH[2]}|${BASH_REMATCH[3]}"
+    fi
+    return 0
+  else
+    warn "sshpipe: unable to get info - disconnected or not a shell on remote?"
+    return 4
+  fi
+}
+export -f sshpipe_status
 
 sshpipe_close() {
   local fdi
@@ -238,30 +353,35 @@ sshpipe_close() {
   out="$remote.$fdo.out"
   pid="$remote.$fdi.pid"
 
-  pushd "$MODERN_SSH_PIPE_DIR" || die "failed to pushd to temporary directory: $MODERN_SSH_PIPE_DIR"
+  pushd "$MODERN_SSH_PIPE_DIR" || die "sshpipe: failed to pushd to temporary directory: $MODERN_SSH_PIPE_DIR"
   eval "exec $fdi>&-"
   eval "exec $fdo>&-"
   kill "$(< "$pid")"
   echo "$pid"
   rm -v "$in" "$out" "$pid"
-  popd || die "failed to popd from temporary directory"
+  popd || die "sshpipe: failed to popd from temporary directory"
 }
+export -f sshpipe_close
 
 sshpipe_tx() { # TODO: make it read from stdin
-  local fd
-  fd=13
+  local fdi
+  fdi=13
+  shift
 
-  echo "$@" >&"$fd"
+  echo -e "$@" >&"$fdi"
 }
+export -f sshpipe_tx
 
 sshpipe_rx() {
   local fdo
   fdo=14
+  shift
 
   while read -r -t 0.1 -u "$fdo" LINE; do
     echo "$LINE"
   done
 }
+export -f sshpipe_rx
 
 resolvepath() {
   p="$1"
@@ -272,26 +392,68 @@ resolvepath() {
   done
   cd -P "$(dirname "$p")" && pwd
 }
+export -f resolvepath
 
 thisdir() {
   dirname -- "$(scriptcaller)"
 }
+export -f thisdir
 
 tmpdir() {
   mktemp -d "${1:-$(scriptname)}.XXXXXXXX" -t # without the -t it will create it in $PWD
 }
+export -f tmpdir
+
+fd_check() {
+  local fd
+  fd="$1"
+  { true >&"$fd"; } 2>&-
+}
+export -f fd_check
+
+pid_check() {
+  local pid
+  local print
+  local exitstatus
+
+  if [[ $1 == "-p" ]]; then
+    print="true"
+    pid="$2"
+  elif [[ ${2:-unset} == "-p" ]]; then
+    print="true"
+    pid="$1"
+  else
+    print="false"
+    pid="$1"
+  fi
+
+  if [[ ! -d /proc/$pid ]]; then
+    wait "$pid"
+    exitstatus="$?"
+    if [[ $print == "true" ]]; then
+      echo "$exitstatus"
+    fi
+    return 255
+  fi
+  return 0
+}
+export -f pid_check
 
 displayname() {
   basename -z "$(dirname "$(readlink -m "$1")")" | tr -d '\0'
   echo -ne "/"
   basename "$1"
 }
+export -f displayname
 
 scriptname() { displayname "$MODERN_CURRENT_FULLPATH"; }
+export -f scriptname
 
 scriptcaller() { readlink -e "$(caller | cut -d " " -f2-)"; }
+export -f scriptcaller
 
 scriptsame() { [[ $MODERN_MAIN_FULLPATH == "$MODERN_CURRENT_FULLPATH" ]]; }
+export -f scriptsame
 
 include() {
   local fullpath="$MODERN_SCRIPT_DIR/_$1.bash"
@@ -305,6 +467,7 @@ include() {
     _set_current_script
   fi
 }
+export -f include
 
 load_nonfatal() {
   local EXITSTATUS
@@ -324,6 +487,7 @@ load_nonfatal() {
     return $EXITSTATUS
   fi
 }
+export -f load_nonfatal
 
 load() {
   local EXITSTATUS
@@ -332,6 +496,7 @@ load() {
   _set_current_script
   [[ $EXITSTATUS -eq 0 ]] || die_status $EXITSTATUS "error loading \`$1\`"
 }
+export -f load
 
 bash_trace() {
   local frame=0
@@ -342,6 +507,7 @@ bash_trace() {
   done
   echo BASH
 }
+export -f bash_trace
 
 _set_current_script() {
   set +o nounset
@@ -357,12 +523,16 @@ _set_current_script() {
     fi
   fi
 }
+export -f _set_current_script
 
 ts()      { date "+%Y-%m-%d %T"; }
+export -f ts
 
 ts_file() { date --utc "+%Y-%m-%d-%H-%M-%S"; }
+export -f ts_file
 
 ts_unix() { date "+%s.%N"; }
+export -f ts_unix
 
 elapsed() {
   started_at=$1
@@ -383,27 +553,44 @@ elapsed() {
     warn "END: $ended_at"
   fi
 }
+export -f elapsed
 
 nl_squeeze() { awk 'BEGIN{RS="";ORS="\n\n"}1' ;}
+export -f nl_squeeze
 
 no_emptylines() {
   sed '/^\s*$/d'
 }
+export -f no_emptylines
 
 sh_comments() { \grep ${1:-} '^\s*#'; }
+export -f sh_comments
 
 no_comments() { sh_comments -v; }
+export -f no_comments
 
 stripscript() {
   no_comments | no_emptylines
 }
+export -f stripscript
+
+strand() {
+  local len
+  local charset
+  len="${1:-8}"
+  charset="${2:-A-Z0-9}"
+  LC_ALL=C tr -dc "$charset" < /dev/urandom | head -c "$len"
+}
+export -f strand
 
 safe_cd() {
   say "entering directory \`$1\`"
   cd "$1" || die "safe_cd: couldn't change directory to \`$1\`";
 }
+export -f safe_cd
 
 command_exists() { command -v "$1" 1>&- 2>&-; }
+export -f command_exists
 
 run() {
   local EXITSTATUS
@@ -419,6 +606,7 @@ run() {
     return 255
   fi
 }
+export -f run
 
 run_or_die() {
   local EXITSTATUS
@@ -427,6 +615,7 @@ run_or_die() {
   EXITSTATUS=$?
   [[ $EXITSTATUS ]] || die_status $EXITSTATUS "$2 command"
 }
+export -f run_or_die
 
 gfix() {
   if command_exists "g$1"; then
@@ -435,24 +624,29 @@ gfix() {
     "$1"
   fi
 }
+export -f gfix
 
 if [[ Darwin = $(uname) ]]; then
 
   readlink() {
     gfix readlink "$@"
   }
+  export -f readlink
 
   basename() {
     gfix basename "$@"
   }
+  export -f basename
 
   date() {
     gfix date "$@"
   }
+  export -f date
 
   stat() {
     gfix stat "$@"
   }
+  export -f stat
 
 fi
 
