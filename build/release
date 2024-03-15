@@ -34,6 +34,7 @@ awk 'BEGIN{print "#!/usr/bin/env bash"} {print}' "$outfile" > tmpfile && mv tmpf
 run "Set Executable" chmod +x "$outfile"
 
 say "building documentation..."
+clean()  { \grep -v 'shellcheck disable='; }
 usages() { \grep '^\s*# usage:' -A 4; }
 mutate() {
   sed "s/# usage:/\n$esc""[35musage:$esc""[0m/g" | \
@@ -41,7 +42,7 @@ mutate() {
   sed "s/#\s*/$esc""[34m\t$esc""[0m/g"
 }
 
-compile | usages | sh_comments | nl_squeeze | mutate > ../doc/help.ansi
+compile | clean | usages | sh_comments | nl_squeeze | mutate > ../doc/help.ansi
 
 teardown
 ok
