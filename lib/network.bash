@@ -60,9 +60,9 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
   eval "exec $fdo<$out"
   popd || die "sshpipe: failed to popd from temporary directory"
 
-  delay="0.25s"
+  delay="0.5s"
   checks=0
-  max_checks=25 # 5 seconds with a delay of 0.25s
+  max_checks=25
   connected=false
 
   while [[ $connected = "false" && checks -lt $max_checks ]] && pid_check "$SSHPIPEPID"; do
@@ -121,7 +121,6 @@ sshpipe_status() {
       ;;
     esac
 
-    MODERN_ARGS+=( "$1" )
     shift
   done
 
