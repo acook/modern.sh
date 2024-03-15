@@ -64,9 +64,11 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
   checks=0
   max_checks=25 # 5 seconds with a delay of 0.25s
   connected=false
+
   while [[ $connected = "false" && checks -lt $max_checks ]] && pid_check "$SSHPIPEPID"; do
+    say "waiting for ssh connection..."
     sleep "$delay"
-    if sshpipe_status kigal > /dev/null; then
+    if sshpipe_status -q "$remote"; then
       connected=true
     fi
   done
@@ -91,41 +93,60 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
 # it returns non-zero for any errors for the detected sshpipe and reports them on stderr
 # if -p is passed in, it will print the remote shell, user, and pwd in the format:
 # shell|user|pwd
+# if -q is passed in, it will not display warning messages and only return exit status codes
 sshpipe_status() {
   local fdi
   local fdo
   local pid
+  local procid
   local print
   local remote
   local result
   fdi=13
   fdo=14
 
-  if [[ $1 == "-p" ]]; then
-    print="true"
-    remote="$2"
-  elif [[ ${2:-unset} == "-p" ]]; then
-    print="true"
-    remote="$1"
-  else
-    print="false"
-    remote="$1"
-  fi
+  quiet="false"
+  print="false"
+
+  while (( $# )); do
+    case $1 in
+      "-q")
+        quiet="true"
+      ;;
+      "-p")
+        print="true"
+      ;;
+      *)
+        remote="$1"
+      ;;
+    esac
+
+    MODERN_ARGS+=( "$1" )
+    shift
+  done
+
+  pid="$remote.$fdi.pid"
 
   if [[ ! -d $MODERN_SSH_PIPE_DIR ]]; then
-    warn "sshpipe: no MODERN_SSH_PIPE_DIR - try connecting with sshpipe_new <host> first?"
+    if [[ $quiet != "true" ]]; then
+      warn "sshpipe: no MODERN_SSH_PIPE_DIR - try connecting with sshpipe_new <host> first?"
+    fi
     return 1
   else
-    pid="$(<"$MODERN_SSH_PIPE_DIR/$remote.$fdi.pid")"
+    procid="$(<"$MODERN_SSH_PIPE_DIR/$pid")"
   fi
 
   if ! fd_check "$fdi" || ! fd_check "$fdo"; then
-    warn "sshpipe: unable to detect the file descriptors used by sshpipe - check ssh credentials?"
+    if [[ $quiet != "true" ]]; then
+      warn "sshpipe: unable to detect the file descriptors used by sshpipe - check ssh credentials?"
+    fi
     return 2
   fi
 
-  if ! exitstatus="$(pid_check "$pid" -p)"; then
-    warn "sshpipe: process exited with status code $exitstatus"
+  if ! exitstatus="$(pid_check "$procid" -p)"; then
+    if [[ $quiet != "true" ]]; then
+      warn "sshpipe: process exited with status code $exitstatus"
+    fi
     return 3
   fi
 
@@ -148,7 +169,9 @@ sshpipe_status() {
     fi
     return 0
   else
-    warn "sshpipe: unable to get info - disconnected or not a shell on remote?"
+    if [[ $quiet != "true" ]]; then
+      warn "sshpipe: unable to get info - disconnected or not a shell on remote?"
+    fi
     return 4
   fi
 }
