@@ -94,7 +94,7 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
 
   while [[ $connected = "false" && checks -lt $max_checks ]] && pid_check "$SSHPIPEPID"; do
     if [[ $quiet != "true" ]]; then
-      say "waiting for ssh connection..."
+      say "sshpipe: waiting for ssh connection..."
     fi
     sleep "$delay"
     if sshpipe_status -q "$remote"; then
