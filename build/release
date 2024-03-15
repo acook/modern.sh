@@ -35,7 +35,7 @@ run "Set Executable" chmod +x "$outfile"
 
 say "building documentation..."
 clean()  { \grep -v 'shellcheck disable='; }
-usages() { \grep '^\s*# usage:' -A 4; }
+usages() { \grep '^\s*# usage:' -A 7; }
 mutate() {
   sed "s/# usage:/\n$esc""[35musage:$esc""[0m/g" | \
   sed "s/# example:/$esc""[34mexample:$esc""[0m/g" | \
