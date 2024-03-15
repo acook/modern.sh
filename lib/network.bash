@@ -22,12 +22,18 @@ rxcp() {
 # example: my_pipe="$(sshpipe_new my_host | tail -n 1)"
 # create a named pipe to send bash commands to remote host
 # <command> is the starting command to run instead of the default shell
+# if -p is passed in, it will print info about the connection in the format:
+# "PIPE_DIR\tFILE_DESCRIPTOR"
+# if -q is passed in, it will not display warning messages and only return exit status codes
+# note that this command requires the options to be passed in *first*
 sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes array
   export MODERN_SSH_PIPE_DIR
   local fdi
   local fdo
   local remote
   local command
+  local quiet
+  local print
   local in
   local out
   local pid
@@ -38,13 +44,34 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
   local max_checks
   fdi=13
   fdo=14
-  remote="$1"
-  shift
+
+  quiet="false"
+  print="false"
+
+  while (( $# )); do
+    case $1 in
+      "-q")
+        quiet="true"
+      ;;
+      "-p")
+        print="true"
+      ;;
+      *)
+        remote="$1"
+        shift
+        break
+      ;;
+    esac
+
+    shift
+  done
+
   if [[ -n ${1:-unset} ]]; then
     command=("$@")
   else
     command=()
   fi
+
   in="$remote.$fdi.in"
   out="$remote.$fdo.out"
   pid="$remote.$fdi.pid"
@@ -66,7 +93,9 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
   connected=false
 
   while [[ $connected = "false" && checks -lt $max_checks ]] && pid_check "$SSHPIPEPID"; do
-    say "waiting for ssh connection..."
+    if [[ $quiet != "true" ]]; then
+      say "waiting for ssh connection..."
+    fi
     sleep "$delay"
     if sshpipe_status -q "$remote"; then
       connected=true
@@ -75,17 +104,23 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
 
   if ! pid_check "$SSHPIPEPID"; then
     wait "$SSHPIPEPID"
-    warn "sshpipe: process exited with status code $?"
+    if [[ $quiet != "true" ]]; then
+      warn "sshpipe: process exited with status code $?"
+    fi
     return 3
   fi
 
   if [[ $connected ==  "true" ]]; then
     say "sshpipe: connected to $remote!"
   else
-    warn "sshpipe: unable to determine if the connection is working"
+    if [[ $quiet != "true" ]]; then
+      warn "sshpipe: unable to determine if the connection is working"
+    fi
   fi
 
-  echo "$MODERN_SSH_PIPE_DIR $fdi"
+  if [[ $print == "true" ]]; then
+    echo "$MODERN_SSH_PIPE_DIR $fdi"
+  fi
 }
 
 # usage: sshpipe_status <host> [-p]
@@ -99,8 +134,9 @@ sshpipe_status() {
   local fdo
   local pid
   local procid
-  local print
   local remote
+  local quiet
+  local print
   local result
   fdi=13
   fdo=14
