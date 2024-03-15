@@ -78,14 +78,14 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
   status="$remote.$fdi.status"
   MODERN_SSH_PIPE_DIR="$(tmpdir sshpipe)"
 
-  pushd "$MODERN_SSH_PIPE_DIR" || die "sshpipe: failed to pushd to temporary directory: $MODERN_SSH_PIPE_DIR"
+  pushd "$MODERN_SSH_PIPE_DIR" 1>&- 2>&- || die "sshpipe: failed to pushd to temporary directory: $MODERN_SSH_PIPE_DIR"
   mkfifo "$in" "$out"
   ( ssh -o BatchMode=yes -tt "$remote" "${command[@]}" < "$in" > "$out" ; echo -n "$?" > "$status" ) &
   SSHPIPEPID="$!"
   echo "$SSHPIPEPID" > "$pid"
   eval "exec $fdi>$in"
   eval "exec $fdo<$out"
-  popd || die "sshpipe: failed to popd from temporary directory"
+  popd 1>&- 2>&- || die "sshpipe: failed to popd from temporary directory"
 
   delay="0.5s"
   checks=0
