@@ -66,23 +66,26 @@
 [35musage:[0m txcp <host> <local_filename> <remote_filename>
 [34mexample:[0m txcp me@example.com asciiart.txt motd.txt
 [34m	[0msend a local file to a remote host using only SSH
-    [34m	[0mshellcheck disable=SC2029
 
 [35musage:[0m rxcp <host> <remote_filename> <local_filename>
 [34mexample:[0m txcp me@example.com garbage.bak davinci.dat
 [34m	[0msend a local file to a remote host using only SSH
-  [34m	[0mshellcheck disable=SC2029
 
 [35musage:[0m sshpipe_new <host> <command>
 [34mexample:[0m my_pipe="$(sshpipe_new my_host | tail -n 1)"
 [34m	[0mcreate a named pipe to send bash commands to remote host
 [34m	[0m<command> is the starting command to run instead of the default shell
+[34m	[0mif -p is passed in, it will print info about the connection in the format:
+[34m	[0m"PIPE_DIR\tFILE_DESCRIPTOR"
+[34m	[0mif -q is passed in, it will not display warning messages and only return exit status codes
+[34m	[0mnote that this command requires the options to be passed in *first*
 
 [35musage:[0m sshpipe_status <host> [-p]
 [34mexample:[0m remote_shell="$(sshpipe_status my_host | cut -d '|' -f 1)"
 [34m	[0mit returns non-zero for any errors for the detected sshpipe and reports them on stderr
 [34m	[0mif -p is passed in, it will print the remote shell, user, and pwd in the format:
-[34m	[0mshell|user|pwd
+[34m	[0mshell\tuser\tpwd
+[34m	[0mif -q is passed in, it will not display warning messages and only return exit status codes
 
 [35musage:[0m sshpipe_close <host>
 [34mexample:[0m sshpipe_close my_host
@@ -98,6 +101,7 @@
 [34m	[0mattempts to resolve all symlinks until the origin path is discovered
 [34m	[0mcircular symlinks will keep it looping forever
 [34m	[0msee also: `man realpath(1)` on some systems
+  [34m	[0mloop until the file is no longer a symlink (or doesn't exist)
 
 [35musage:[0m tmpdir: [prefix]
 [34mexample:[0m my_temp_folder="$(tmpdir)"
@@ -155,6 +159,7 @@
 [34m	[0mused internally to set the current script global used by `scriptsame` and `scriptname`
 [34m	[0mif this gets broken then:
 [34m	[0m- `scriptname`: it may become difficult to trace errors as reported messages will incorrectly identify the script they originated from
+[34m	[0m- `scriptsame`: files which can be used as both a library and an executable will no longer be able to determine what they should be doing
 
 [35musage:[0m ts
 [34mexample:[0m echo "The time is $(ts)

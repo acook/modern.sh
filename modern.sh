@@ -219,6 +219,8 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
   local fdo
   local remote
   local command
+  local quiet
+  local print
   local in
   local out
   local pid
@@ -229,52 +231,83 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
   local max_checks
   fdi=13
   fdo=14
-  remote="$1"
-  shift
+
+  quiet="false"
+  print="false"
+
+  while (( $# )); do
+    case $1 in
+      "-q")
+        quiet="true"
+      ;;
+      "-p")
+        print="true"
+      ;;
+      *)
+        remote="$1"
+        shift
+        break
+      ;;
+    esac
+
+    shift
+  done
+
   if [[ -n ${1:-unset} ]]; then
     command=("$@")
   else
     command=()
   fi
+
   in="$remote.$fdi.in"
   out="$remote.$fdo.out"
   pid="$remote.$fdi.pid"
   status="$remote.$fdi.status"
   MODERN_SSH_PIPE_DIR="$(tmpdir sshpipe)"
 
-  pushd "$MODERN_SSH_PIPE_DIR" || die "sshpipe: failed to pushd to temporary directory: $MODERN_SSH_PIPE_DIR"
+  pushd "$MODERN_SSH_PIPE_DIR" 1>&- 2>&- || die "sshpipe: failed to pushd to temporary directory: $MODERN_SSH_PIPE_DIR"
   mkfifo "$in" "$out"
   ( ssh -o BatchMode=yes -tt "$remote" "${command[@]}" < "$in" > "$out" ; echo -n "$?" > "$status" ) &
   SSHPIPEPID="$!"
   echo "$SSHPIPEPID" > "$pid"
   eval "exec $fdi>$in"
   eval "exec $fdo<$out"
-  popd || die "sshpipe: failed to popd from temporary directory"
+  popd 1>&- 2>&- || die "sshpipe: failed to popd from temporary directory"
 
-  delay="0.25s"
+  delay="0.5s"
   checks=0
-  max_checks=25 # 5 seconds with a delay of 0.25s
+  max_checks=25
   connected=false
+
   while [[ $connected = "false" && checks -lt $max_checks ]] && pid_check "$SSHPIPEPID"; do
+    if [[ $quiet != "true" ]]; then
+      say "sshpipe: waiting for ssh connection..."
+    fi
     sleep "$delay"
-    if sshpipe_status kigal > /dev/null; then
+    if sshpipe_status -q "$remote"; then
       connected=true
     fi
   done
 
   if ! pid_check "$SSHPIPEPID"; then
     wait "$SSHPIPEPID"
-    warn "sshpipe: process exited with status code $?"
+    if [[ $quiet != "true" ]]; then
+      warn "sshpipe: process exited with status code $?"
+    fi
     return 3
   fi
 
   if [[ $connected ==  "true" ]]; then
     say "sshpipe: connected to $remote!"
   else
-    warn "sshpipe: unable to determine if the connection is working"
+    if [[ $quiet != "true" ]]; then
+      warn "sshpipe: unable to determine if the connection is working"
+    fi
   fi
 
-  echo "$MODERN_SSH_PIPE_DIR $fdi"
+  if [[ $print == "true" ]]; then
+    echo "$MODERN_SSH_PIPE_DIR $fdi"
+  fi
 }
 export -f sshpipe_new
 
@@ -282,37 +315,55 @@ sshpipe_status() {
   local fdi
   local fdo
   local pid
-  local print
+  local procid
   local remote
+  local quiet
+  local print
   local result
   fdi=13
   fdo=14
 
-  if [[ $1 == "-p" ]]; then
-    print="true"
-    remote="$2"
-  elif [[ ${2:-unset} == "-p" ]]; then
-    print="true"
-    remote="$1"
-  else
-    print="false"
-    remote="$1"
-  fi
+  quiet="false"
+  print="false"
+
+  while (( $# )); do
+    case $1 in
+      "-q")
+        quiet="true"
+      ;;
+      "-p")
+        print="true"
+      ;;
+      *)
+        remote="$1"
+      ;;
+    esac
+
+    shift
+  done
+
+  pid="$remote.$fdi.pid"
 
   if [[ ! -d $MODERN_SSH_PIPE_DIR ]]; then
-    warn "sshpipe: no MODERN_SSH_PIPE_DIR - try connecting with sshpipe_new <host> first?"
+    if [[ $quiet != "true" ]]; then
+      warn "sshpipe: no MODERN_SSH_PIPE_DIR - try connecting with sshpipe_new <host> first?"
+    fi
     return 1
   else
-    pid="$(<"$MODERN_SSH_PIPE_DIR/$remote.$fdi.pid")"
+    procid="$(<"$MODERN_SSH_PIPE_DIR/$pid")"
   fi
 
   if ! fd_check "$fdi" || ! fd_check "$fdo"; then
-    warn "sshpipe: unable to detect the file descriptors used by sshpipe - check ssh credentials?"
+    if [[ $quiet != "true" ]]; then
+      warn "sshpipe: unable to detect the file descriptors used by sshpipe - check ssh credentials?"
+    fi
     return 2
   fi
 
-  if ! exitstatus="$(pid_check "$pid" -p)"; then
-    warn "sshpipe: process exited with status code $exitstatus"
+  if ! exitstatus="$(pid_check "$procid" -p)"; then
+    if [[ $quiet != "true" ]]; then
+      warn "sshpipe: process exited with status code $exitstatus"
+    fi
     return 3
   fi
 
@@ -329,11 +380,13 @@ sshpipe_status() {
   regex='\[\s(.*sh)\s\|\s(.*)\s\|\s(.*)\s\]'
   if [[ $result =~ $regex ]]; then
     if [[ $print == "true" ]]; then
-      echo -e "${BASH_REMATCH[1]}|${BASH_REMATCH[2]}|${BASH_REMATCH[3]}"
+      echo -e "${BASH_REMATCH[1]}\t${BASH_REMATCH[2]}\t${BASH_REMATCH[3]}"
     fi
     return 0
   else
-    warn "sshpipe: unable to get info - disconnected or not a shell on remote?"
+    if [[ $quiet != "true" ]]; then
+      warn "sshpipe: unable to get info - disconnected or not a shell on remote?"
+    fi
     return 4
   fi
 }
