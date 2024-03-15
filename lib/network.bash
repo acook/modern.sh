@@ -127,7 +127,7 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
 # example: remote_shell="$(sshpipe_status my_host | cut -d '|' -f 1)"
 # it returns non-zero for any errors for the detected sshpipe and reports them on stderr
 # if -p is passed in, it will print the remote shell, user, and pwd in the format:
-# shell|user|pwd
+# shell\tuser\tpwd
 # if -q is passed in, it will not display warning messages and only return exit status codes
 sshpipe_status() {
   local fdi
@@ -200,7 +200,7 @@ sshpipe_status() {
   regex='\[\s(.*sh)\s\|\s(.*)\s\|\s(.*)\s\]'
   if [[ $result =~ $regex ]]; then
     if [[ $print == "true" ]]; then
-      echo -e "${BASH_REMATCH[1]}|${BASH_REMATCH[2]}|${BASH_REMATCH[3]}"
+      echo -e "${BASH_REMATCH[1]}\t${BASH_REMATCH[2]}\t${BASH_REMATCH[3]}"
     fi
     return 0
   else
