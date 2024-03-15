@@ -211,6 +211,25 @@ sshpipe_status() {
   fi
 }
 
+# usage: sshpipe_hostinfo <host>
+# example: sshpipe_hostinfo my_host
+# print information about the remote host, if connected
+sshpipe_hostinfo() {
+  local remote
+  remote="$1"
+
+  if INFO="$(sshpipe_status "$remote" -p)"; then
+    echo -e "\e[31m"
+    echo -n "SHELL: "
+    echo "$INFO" | cut -s -f 1
+    echo -n "USER:  "
+    echo "$INFO" | cut -s -f 2
+    echo -n "PWD:   "
+    echo "$INFO" | cut -s -f 3
+    echo -e "\e[0m"
+  fi
+}
+
 # usage: sshpipe_close <host>
 # example: sshpipe_close my_host
 # close a preexisting sshpipe
