@@ -1,4 +1,4 @@
-# COMPATIBILITY
+## COMPATIBILITY
 #
 # Shell polyfills to ensure functionality across different environments.
 

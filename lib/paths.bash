@@ -1,4 +1,4 @@
-# PATHS
+## PATHS
 #
 # Helpers for finding and working with paths and filenames.
 

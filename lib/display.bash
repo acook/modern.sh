@@ -1,4 +1,4 @@
-# DISPLAY
+## DISPLAY
 #
 # This contains functions that are important for basic information output, color, and cursor movement.
 

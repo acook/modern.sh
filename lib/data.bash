@@ -1,4 +1,4 @@
-# DATA
+## DATA
 #
 # Functions for data manipulation and inspection.
 

@@ -9,7 +9,7 @@ source ../modern.sh
 outfile="../modern.sh"
 
 say "building new monolithic library..."
-setup() { echo > ,; esc="$(printf '\033')"; }
+setup() { echo > ,; esc="$(printf '\033')"; nl=nl=$'\n'; }
 teardown() { rm ,; }
 compile() {
   cat \
@@ -35,11 +35,12 @@ run "Set Executable" chmod +x "$outfile"
 
 say "building documentation..."
 clean()  { \grep -v 'shellcheck disable='; }
-usages() { \grep '^\s*# usage:' -A 7; }
+usages() { \grep '^\s*# usage\|##' -A 7; }
 mutate() {
-  sed "s/# usage:/\n$esc""[35musage:$esc""[0m/g" | \
-  sed "s/# example:/$esc""[34mexample:$esc""[0m/g" | \
-  sed "s/#\s*/$esc""[34m\t$esc""[0m/g"
+  sed "s/# usage:/\n$esc""[35musage:$esc""[0m/" | \
+  sed "s/# example:/$esc""[34mexample:$esc""[0m/" | \
+  sed "s/## \(\S*\)/\n\n${esc}[7;1;33m  \1  ${esc}[0m/" | \
+  sed "s/#\s*/$esc""[34m\t$esc""[0m/"
 }
 
 compile | clean | usages | sh_comments | nl_squeeze | mutate > ../doc/help.ansi

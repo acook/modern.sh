@@ -1,4 +1,4 @@
-# EXIT
+## EXIT
 #
 # Functions for exiting with messages.
 

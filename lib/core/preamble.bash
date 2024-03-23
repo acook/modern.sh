@@ -1,10 +1,10 @@
-# INIT
-#
-# Basic initialization.
-# Don't overwrite these values manually.
+ ## INIT
+ #
+ # Basic initialization.
+ # Don't overwrite these values manually.
 
-# directory that execution began in
-# useful if we lose track of where we started after `cd`
+ # directory that execution began in
+ # useful if we lose track of where we started after `cd`
 MODERN_SCRIPT_ORIG_PWD="$(pwd -P)"
 
 # shellcheck disable=SC2128

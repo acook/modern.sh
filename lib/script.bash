@@ -1,4 +1,4 @@
-# SCRIPT
+## SCRIPT
 #
 # Crucial functions for managing scripts.
 

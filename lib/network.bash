@@ -1,4 +1,4 @@
-# NETWORK
+## NETWORK
 #
 # This contains functions that are useful for network operations.
 

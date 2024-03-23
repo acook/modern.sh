@@ -1,4 +1,4 @@
-# TIME
+## TIME
 #
 # Time-related functions.
 
