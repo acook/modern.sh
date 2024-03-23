@@ -77,6 +77,9 @@ if [[ $MODERN_PROCESS_ARGS == "true" ]]; then
       "quiet")
         MODERN_QUIET=true
       ;;
+      "shell")
+        MODERN_START_SHELL=true
+      ;;
       *)
         MODERN_ARGS_UNKNOWN+=( "$1" )
       ;;
@@ -91,6 +94,10 @@ else
   MODERN_ARGS_UNKNOWN=("$@")
 fi
 
+# default to false, don't export
+MODERN_START_SHELL="${MODERN_START_SHELL:-false}"
+
+# show setup info
 if [[ $MODERN_QUIET != "true" ]]; then
   echo -ne " -- ("
   basename -z "$(dirname "$MODERN_MAIN_DIR")" | tr -d '\0'

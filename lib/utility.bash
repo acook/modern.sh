@@ -40,3 +40,17 @@ strand() {
   charset="${2:-A-Z0-9}"
   LC_ALL=C tr -dc "$charset" < /dev/urandom | head -c "$len"
 }
+
+# usage: update_modern_sh
+# downloads the latest version of modern.sh
+update_modern_sh() {
+  safe_cd "$MODERN_SCRIPT_DIR"
+  run "downloading latest modern.sh" curl -O -L https://raw.githubusercontent.com/acook/modern.sh/main/modern.sh
+}
+
+# usage: start_interactive_modern_shell
+# loads modern.sh before dropping into an interactive bash shell
+# so everything from modern.sh is available
+start_interactive_modern_shell() {
+  /usr/bin/env bash -i <<< "source $MODERN_SCRIPT_FULLPATH; exec </dev/tty"
+}

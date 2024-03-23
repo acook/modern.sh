@@ -15,3 +15,7 @@ if ! [[ -w $TMPDIR ]]; then
   warn "TMPDIR '$TMPDIR' not writable! using '.' instead"
   TMPDIR='.'
 fi
+
+if [[ $MODERN_START_SHELL == "true" ]]; then
+  start_interactive_modern_shell
+fi
