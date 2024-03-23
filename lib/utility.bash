@@ -44,7 +44,7 @@ strand() {
 # usage: modern_sh_install
 # downloads the latest version of modern.sh
 modern_sh_install() {
-  run "downloading latest modern.sh" curl -O -L https://raw.githubusercontent.com/acook/modern.sh/main/modern.sh
+  run "downloader for latest modern.sh" curl -O -L https://raw.githubusercontent.com/acook/modern.sh/main/modern.sh
 }
 
 # usage: modern_sh_update
