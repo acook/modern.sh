@@ -17,7 +17,7 @@ no_emptylines() {
 # usage: <input> | sh_comments [grep_args]
 # example: cat foo.bash | sh_comments
 # extracts only lines starting with an octothorpe
-sh_comments() { \grep ${1:-} '^\s*#'; }
+sh_comments() { \grep ${1:-} '^#'; }
 
 # usage: <input> | no_comments
 # example: cat foo.bash | no_comments
