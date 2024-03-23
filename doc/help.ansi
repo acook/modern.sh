@@ -1,3 +1,12 @@
+[7;1;36m  MODERN.SH DOCUMENTATION  [0m
+
+[7;1;33m  INIT  [0m
+
+[35musage:[0m modern.sh [args]
+[34mexample:[0m source modern.sh       [34m	[0minclude modern capabilities into your shell script
+[34mexample:[0m source modern.sh quiet [34m	[0mas above, with less output
+[34mexample:[0m modern.sh download     [34m	[0mdownload modern.sh into current path, good for vendoring
+[34mexample:[0m modern.sh update       [34m	[0mupdate itself
 
 
 [7;1;33m  DATA  [0m

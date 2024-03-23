@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
- ## INIT
  #
  # Basic initialization.
  # Don't overwrite these values manually.
+ #
 
  # directory that execution began in
  # useful if we lose track of where we started after `cd`
@@ -68,6 +68,12 @@ if [[ $MODERN_PROCESS_ARGS == "true" ]]; then
       "shell")
         MODERN_START_SHELL=true
       ;;
+      "download")
+        MODERN_DOWNLOAD_SELF=true
+      ;;
+      "update")
+        MODERN_UPDATE_SELF=true
+      ;;
       *)
         MODERN_ARGS_UNKNOWN+=( "$1" )
       ;;
@@ -83,6 +89,8 @@ else
 fi
 
 MODERN_START_SHELL="${MODERN_START_SHELL:-false}"
+MODERN_DOWNLOAD_SELF="${MODERN_DOWNLOAD_SELF:-false}"
+MODERN_UPDATE_SELF="${MODERN_UPDATE_SELF:-false}"
 
 if [[ $MODERN_QUIET != "true" ]]; then
   echo -ne " -- ("
@@ -685,7 +693,7 @@ strand() {
 export -f strand
 
 modern_sh_install() {
-  run "downloading latest modern.sh" curl -O -L https://raw.githubusercontent.com/acook/modern.sh/main/modern.sh
+  run "downloader for latest modern.sh" curl -O -L https://raw.githubusercontent.com/acook/modern.sh/main/modern.sh
 }
 export -f modern_sh_install
 
@@ -783,6 +791,14 @@ set -o nounset
 if ! [[ -w $TMPDIR ]]; then
   warn "TMPDIR '$TMPDIR' not writable! using '.' instead"
   TMPDIR='.'
+fi
+
+if [[ $MODERN_DOWNLOAD_SELF == "true" ]]; then
+  modern_sh_install
+fi
+
+if [[ $MODERN_UPDATE_SELF == "true" ]]; then
+  modern_sh_update
 fi
 
 if [[ $MODERN_START_SHELL == "true" ]]; then
