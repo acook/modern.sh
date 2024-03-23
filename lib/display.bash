@@ -106,6 +106,5 @@ ansiup() {
 # example: echo "foo bar baz" | hilite bar $(colorfg green)
 # highlights the matching text with the given style
 hilite() {
-    REGEX_SED=$(echo $1 | sed "s/[|()]/\\\&/g");
-    sed "s/$REGEX_SED/$2&$(colorreset)/g"
+    sed "s/$1/$2&$(colorreset)/g"
 }
