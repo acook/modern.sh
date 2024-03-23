@@ -1,7 +1,14 @@
- ## INIT
+## INIT
  #
  # Basic initialization.
  # Don't overwrite these values manually.
+ #
+
+# usage: modern.sh [args]
+# example: source modern.sh       # include modern capabilities into your shell script
+# example: source modern.sh quiet # as above, with less output
+# example: modern.sh download     # download modern.sh into current path, good for vendoring
+# example: modern.sh update       # update itself
 
  # directory that execution began in
  # useful if we lose track of where we started after `cd`
@@ -80,6 +87,12 @@ if [[ $MODERN_PROCESS_ARGS == "true" ]]; then
       "shell")
         MODERN_START_SHELL=true
       ;;
+      "download")
+        MODERN_DOWNLOAD_SELF=true
+      ;;
+      "update")
+        MODERN_UPDATE_SELF=true
+      ;;
       *)
         MODERN_ARGS_UNKNOWN+=( "$1" )
       ;;
@@ -96,6 +109,8 @@ fi
 
 # default to false, don't export
 MODERN_START_SHELL="${MODERN_START_SHELL:-false}"
+MODERN_DOWNLOAD_SELF="${MODERN_DOWNLOAD_SELF:-false}"
+MODERN_UPDATE_SELF="${MODERN_UPDATE_SELF:-false}"
 
 # show setup info
 if [[ $MODERN_QUIET != "true" ]]; then

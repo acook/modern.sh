@@ -16,6 +16,14 @@ if ! [[ -w $TMPDIR ]]; then
   TMPDIR='.'
 fi
 
+if [[ $MODERN_DOWNLOAD_SELF == "true" ]]; then
+  modern_sh_install
+fi
+
+if [[ $MODERN_UPDATE_SELF == "true" ]]; then
+  modern_sh_update
+fi
+
 if [[ $MODERN_START_SHELL == "true" ]]; then
   start_interactive_modern_shell
 fi
