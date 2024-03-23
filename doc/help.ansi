@@ -252,7 +252,10 @@
 [34mexample:[0m my_token="$(strand 16 'A-Za-z0-9!"[34m	[0m$%&\'()*+,-./:;<=>?@[\]^_`{|}~')"
 [34m	[0mgenerates a random string
 
-[35musage:[0m update_modern_sh
+[35musage:[0m modern_sh_install
+[34m	[0mdownloads the latest version of modern.sh
+
+[35musage:[0m modern_sh_update
 [34m	[0mdownloads the latest version of modern.sh
 
 [35musage:[0m start_interactive_modern_shell

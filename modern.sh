@@ -684,11 +684,16 @@ strand() {
 }
 export -f strand
 
-update_modern_sh() {
-  safe_cd "$MODERN_SCRIPT_DIR"
+modern_sh_install() {
   run "downloading latest modern.sh" curl -O -L https://raw.githubusercontent.com/acook/modern.sh/main/modern.sh
 }
-export -f update_modern_sh
+export -f modern_sh_install
+
+modern_sh_update() {
+  safe_cd "$MODERN_SCRIPT_DIR"
+  modern_sh_install
+}
+export -f modern_sh_update
 
 start_interactive_modern_shell() {
   /usr/bin/env bash -i <<< "source $MODERN_SCRIPT_FULLPATH; exec </dev/tty"
