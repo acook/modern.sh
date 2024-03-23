@@ -1,11 +1,22 @@
 #!/usr/bin/env bash
+ ## INIT
+ #
+ # Basic initialization.
+ # Don't overwrite these values manually.
+
+ # directory that execution began in
+ # useful if we lose track of where we started after `cd`
 MODERN_SCRIPT_ORIG_PWD="$(pwd -P)"
 
 if [[ -n $BASH_SOURCE ]]; then
+  # get the full path to this file being included (typically ending in "modern.sh")
   MODERN_SCRIPT_FULLPATH="$(readlink -e "${BASH_SOURCE[0]}")"
 
+  # get the full path to the script that was originally run
+  # this is typically the one that later included modern.sh
   MODERN_MAIN_FULLPATH="$(readlink -e "$0")"
 
+  # lets modern.sh functions know that there is no file to load from
   MODERN_SCRIPT_FILELESS="false"
 else # the script was run via something like `curl https://example.com/script.bash | bash -s`
   MODERN_SCRIPT_FULLPATH="$MODERN_SCRIPT_ORIG_PWD/modern.sh"
@@ -40,13 +51,22 @@ export MODERN_ARGS
 MODERN_ARGS_UNKNOWN=( )
 export MODERN_ARGS_UNKNOWN
 
-MODERN_PROCESS_ARGS="${MODERN_PROCESS_ARGS:-false}"
+if [[ -z ${MODERN_PROCESS_ARGS+unset} ]]; then
+  if [[ $MODERN_MAIN_FULLPATH == "$MODERN_SCRIPT_FULLPATH" ]]; then
+    MODERN_PROCESS_ARGS="true"
+  else
+    MODERN_PROCESS_ARGS="false"
+  fi
+fi
 
 if [[ $MODERN_PROCESS_ARGS == "true" ]]; then
   while (( $# )); do
     case $1 in
       "quiet")
         MODERN_QUIET=true
+      ;;
+      "shell")
+        MODERN_START_SHELL=true
       ;;
       *)
         MODERN_ARGS_UNKNOWN+=( "$1" )
@@ -61,6 +81,8 @@ else
   MODERN_ARGS=()
   MODERN_ARGS_UNKNOWN=("$@")
 fi
+
+MODERN_START_SHELL="${MODERN_START_SHELL:-false}"
 
 if [[ $MODERN_QUIET != "true" ]]; then
   echo -ne " -- ("
@@ -171,8 +193,7 @@ ansiup() {
 export -f ansiup
 
 hilite() {
-    REGEX_SED=$(echo $1 | sed "s/[|()]/\\\&/g");
-    sed "s/$REGEX_SED/$2&$(colorreset)/g"
+    sed "s/$1/$2&$(colorreset)/g"
 }
 export -f hilite
 
@@ -204,11 +225,13 @@ quit_status() {
 export -f quit_status
 
 txcp() {
+    # shellcheck disable=SC2029
     ssh "$1" "cat > '$3'" < "$2"
 }
 export -f txcp
 
 rxcp() {
+  # shellcheck disable=SC2029
   ssh "$1" "cat $2" > "$3"
 }
 export -f rxcp
@@ -291,8 +314,9 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
 
   if ! pid_check "$SSHPIPEPID"; then
     wait "$SSHPIPEPID"
+    exitstatus=$?
     if [[ $quiet != "true" ]]; then
-      warn "sshpipe: process exited with status code $?"
+      warn "sshpipe: process exited with status code $exitstatus"
     fi
     return 3
   fi
@@ -368,11 +392,13 @@ sshpipe_status() {
   fi
 
   if [[ $print == "true" ]]; then
+    # redirect to stderr so it is easy to separate from the actual info
     sshpipe_rx "$remote" >&2
   else
     sshpipe_rx "$remote" > /dev/null
   fi
 
+  # shellcheck disable=SC2028,SC2016
   echo 'printf "\133 $SHELL \174 $USER \174 $PWD \135\n"' >&"$fdi"
 
   result="$(sshpipe_rx "$remote")"
@@ -455,9 +481,12 @@ export -f sshpipe_rx
 
 resolvepath() {
   p="$1"
+  # loop until the file is no longer a symlink (or doesn't exist)
   while [[ -h $p ]]; do
     d="$( cd -P "$( dirname "$p" )" && pwd )"
     p="$(readlink -e "$p")"
+    # if $p was a relative symlink
+    # we need to resolve it relative to the path where the symlink file was located
     [[ $p != /* ]] && p="$d/$p"
   done
   cd -P "$(dirname "$p")" && pwd
@@ -498,6 +527,8 @@ pid_check() {
   fi
 
   if [[ ! -d /proc/$pid ]]; then
+    # only use `wait`` if it has already exited
+    # `wait` will fetch the exit code of an arbitrary pid even after it is already closed
     wait "$pid"
     exitstatus="$?"
     if [[ $print == "true" ]]; then
@@ -633,7 +664,7 @@ no_emptylines() {
 }
 export -f no_emptylines
 
-sh_comments() { \grep ${1:-} '^\s*#'; }
+sh_comments() { \grep ${1:-} '^#'; }
 export -f sh_comments
 
 no_comments() { sh_comments -v; }
@@ -652,6 +683,17 @@ strand() {
   LC_ALL=C tr -dc "$charset" < /dev/urandom | head -c "$len"
 }
 export -f strand
+
+update_modern_sh() {
+  safe_cd "$MODERN_SCRIPT_DIR"
+  run "downloading latest modern.sh" curl -O -L https://raw.githubusercontent.com/acook/modern.sh/main/modern.sh
+}
+export -f update_modern_sh
+
+start_interactive_modern_shell() {
+  /usr/bin/env bash -i <<< "source $MODERN_SCRIPT_FULLPATH; exec </dev/tty"
+}
+export -f start_interactive_modern_shell
 
 safe_cd() {
   say "entering directory \`$1\`"
@@ -720,6 +762,11 @@ if [[ Darwin = $(uname) ]]; then
 
 fi
 
+ ## FINALIZE
+ #
+ # Finalization of setup.
+ # Don't overwrite these values manually.
+
 _set_current_script
 
 set +o nounset
@@ -731,5 +778,9 @@ set -o nounset
 if ! [[ -w $TMPDIR ]]; then
   warn "TMPDIR '$TMPDIR' not writable! using '.' instead"
   TMPDIR='.'
+fi
+
+if [[ $MODERN_START_SHELL == "true" ]]; then
+  start_interactive_modern_shell
 fi
 

@@ -1,7 +1,19 @@
 
+
+[7;1;33m  DATA  [0m
+[34m	[0m
+[34m	[0mFunctions for data manipulation and inspection.
+
 [35musage:[0m array_contains <needle> <haystack>
 [34mexample:[0m array_contains "entry" "$list"
 [34m	[0m!! BROKEN !!
+
+
+[7;1;33m  DISPLAY  [0m
+[34m	[0m
+[34m	[0mThis contains functions that are important for basic information output, color, and cursor movement.
+[34m	[0mrequired by `say` for timestamps
+[34m	[0mneeds time
 
 [35musage:[0m say <text>
 [34mexample:[0m say 'articulating splines'
@@ -45,6 +57,15 @@
 [34mexample:[0m echo "foo bar baz" | hilite bar $(colorfg green)
 [34m	[0mhighlights the matching text with the given style
 
+
+[7;1;33m  EXIT  [0m
+[34m	[0m
+[34m	[0mFunctions for exiting with messages.
+[34m	[0mrequires say and warn functions for messaging
+[34m	[0mneeds display
+[34m	[0mrequire scriptsame to know how to exit
+[34m	[0mneeds script
+
 [35musage:[0m ok <message>
 [34mexample:[0m ok 'all good!'
 [34m	[0mformatted success message and exit
@@ -62,6 +83,11 @@
 [35musage:[0m quit_status <status> [message]
 [34mexample:[0m quit_status $? "last command exited"
 [34m	[0mautomatically selects the correct exit function based on context
+
+
+[7;1;33m  NETWORK  [0m
+[34m	[0m
+[34m	[0mThis contains functions that are useful for network operations.
 
 [35musage:[0m txcp <host> <local_filename> <remote_filename>
 [34mexample:[0m txcp me@example.com asciiart.txt motd.txt
@@ -101,11 +127,15 @@
 [35musage:[0m sshpipe_rx <host>
 [34mexample:[0m sshpipe_rx my_host | grep ' line ' | tee errors.txt
 
+
+[7;1;33m  PATHS  [0m
+[34m	[0m
+[34m	[0mHelpers for finding and working with paths and filenames.
+
 [35musage:[0m resolvepath <path>
 [34m	[0mattempts to resolve all symlinks until the origin path is discovered
 [34m	[0mcircular symlinks will keep it looping forever
 [34m	[0msee also: `man realpath(1)` on some systems
-  [34m	[0mloop until the file is no longer a symlink (or doesn't exist)
 
 [35musage:[0m tmpdir: [prefix]
 [34mexample:[0m my_temp_folder="$(tmpdir)"
@@ -122,6 +152,13 @@
 [34m	[0mnon-blocking process status check
 [34m	[0mreturns 0 if process is live
 [34m	[0mreturns 255 and if -p it prints the processes exit status if dead
+
+
+[7;1;33m  SCRIPT  [0m
+[34m	[0m
+[34m	[0mCrucial functions for managing scripts.
+[34m	[0mrequired for the warn function to show errors
+[34m	[0mneeds display
 
 [35musage:[0m displayname <path>
 [34mexample:[0m displayname "$(pwd)"
@@ -165,6 +202,11 @@
 [34m	[0m- `scriptname`: it may become difficult to trace errors as reported messages will incorrectly identify the script they originated from
 [34m	[0m- `scriptsame`: files which can be used as both a library and an executable will no longer be able to determine what they should be doing
 
+
+[7;1;33m  TIME  [0m
+[34m	[0m
+[34m	[0mTime-related functions.
+
 [35musage:[0m ts
 [34mexample:[0m echo "The time is $(ts)
 [34m	[0mlocal timestamp for output
@@ -181,6 +223,11 @@
 [35musage:[0m elapsed <start_time> <end_time>
 [34m	[0mtakes two unix timestamps with nanoseconds
 [34m	[0mreturns the difference in human-readable format
+
+
+[7;1;33m  UTILITY  [0m
+[34m	[0m
+[34m	[0mFunctions which perform useful but more complex and less essential tasks.
 
 [35musage:[0m <input> | nl_squeeze
 [34mexample:[0m cat foo.txt | nl_squeeze
@@ -205,6 +252,18 @@
 [34mexample:[0m my_token="$(strand 16 'A-Za-z0-9!"[34m	[0m$%&\'()*+,-./:;<=>?@[\]^_`{|}~')"
 [34m	[0mgenerates a random string
 
+[35musage:[0m update_modern_sh
+[34m	[0mdownloads the latest version of modern.sh
+
+[35musage:[0m start_interactive_modern_shell
+[34m	[0mloads modern.sh before dropping into an interactive bash shell
+[34m	[0mso everything from modern.sh is available
+
+
+[7;1;33m  WRAPPERS  [0m
+[34m	[0m
+[34m	[0mThese functions exist for wrapping around common use cases.
+
 [35musage:[0m safe_cd <path>
 [34mexample:[0m safe_cd /mnt/network_drive
 [34m	[0mif cd fails then we should exit
@@ -221,6 +280,11 @@
 [35musage:[0m run_or_die "title" <command> [args]
 [34mexample:[0m run_or_die "download dependencies" curl -O package.pkg
 [34m	[0mas run, but die if command missing or exits with an error
+
+
+[7;1;33m  COMPATIBILITY  [0m
+[34m	[0m
+[34m	[0mShell polyfills to ensure functionality across different environments.
 
 [35musage:[0m gfix <command> <opts>
 [34mexample:[0m gfix readlink -m .
