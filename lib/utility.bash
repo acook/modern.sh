@@ -41,11 +41,17 @@ strand() {
   LC_ALL=C tr -dc "$charset" < /dev/urandom | head -c "$len"
 }
 
-# usage: update_modern_sh
+# usage: modern_sh_install
 # downloads the latest version of modern.sh
-update_modern_sh() {
-  safe_cd "$MODERN_SCRIPT_DIR"
+modern_sh_install() {
   run "downloading latest modern.sh" curl -O -L https://raw.githubusercontent.com/acook/modern.sh/main/modern.sh
+}
+
+# usage: modern_sh_update
+# downloads the latest version of modern.sh
+modern_sh_update() {
+  safe_cd "$MODERN_SCRIPT_DIR"
+  modern_sh_install
 }
 
 # usage: start_interactive_modern_shell
