@@ -87,6 +87,10 @@
 [34m	[0mshell\tuser\tpwd
 [34m	[0mif -q is passed in, it will not display warning messages and only return exit status codes
 
+[35musage:[0m sshpipe_hostinfo <host>
+[34mexample:[0m sshpipe_hostinfo my_host
+[34m	[0mprint information about the remote host, if connected
+
 [35musage:[0m sshpipe_close <host>
 [34mexample:[0m sshpipe_close my_host
 [34m	[0mclose a preexisting sshpipe

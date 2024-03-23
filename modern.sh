@@ -392,6 +392,23 @@ sshpipe_status() {
 }
 export -f sshpipe_status
 
+sshpipe_hostinfo() {
+  local remote
+  remote="$1"
+
+  if INFO="$(sshpipe_status "$remote" -p)"; then
+    echo -e "\e[31m"
+    echo -n "SHELL: "
+    echo "$INFO" | cut -s -f 1
+    echo -n "USER:  "
+    echo "$INFO" | cut -s -f 2
+    echo -n "PWD:   "
+    echo "$INFO" | cut -s -f 3
+    echo -e "\e[0m"
+  fi
+}
+export -f sshpipe_hostinfo
+
 sshpipe_close() {
   local fdi
   local fdo
