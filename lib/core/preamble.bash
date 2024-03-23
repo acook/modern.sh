@@ -59,7 +59,14 @@ export MODERN_ARGS
 MODERN_ARGS_UNKNOWN=( )
 export MODERN_ARGS_UNKNOWN
 
-MODERN_PROCESS_ARGS="${MODERN_PROCESS_ARGS:-false}"
+# if MODERN_PROCESS_ARGS is unset then we set it to true if modern.sh was run directly
+if [[ -z ${MODERN_PROCESS_ARGS+unset} ]]; then
+  if [[ $MODERN_MAIN_FULLPATH == "$MODERN_SCRIPT_FULLPATH" ]]; then
+    MODERN_PROCESS_ARGS="true"
+  else
+    MODERN_PROCESS_ARGS="false"
+  fi
+fi
 
 # if MODERN_PROCESS_ARGS is set to "true" then
 # we will consume all arguments here and put them in MODERN_ARGS
