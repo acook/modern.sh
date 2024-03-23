@@ -104,8 +104,9 @@ sshpipe_new() { # manage multiple file descriptors, MODERN_SSH_PIPE_DIR becomes 
 
   if ! pid_check "$SSHPIPEPID"; then
     wait "$SSHPIPEPID"
+    exitstatus=$?
     if [[ $quiet != "true" ]]; then
-      warn "sshpipe: process exited with status code $?"
+      warn "sshpipe: process exited with status code $exitstatus"
     fi
     return 3
   fi
